@@ -1,56 +1,39 @@
-def max_ts(cln, station, t, tsu):
+def apply_rule(rule, instance, candidates, station):
+    if rule == "max_ts":
+        return setups_plus_processing(candidates, station, instance.setups, instance.processing_times, reverse=True)
+    elif rule == "min_ts":
+        return setups_plus_processing(candidates, station, instance.setups, instance.processing_times, reverse=False)
+    elif rule == "max_s":
+        return setups_only(candidates, station, instance.setups, reverse=True)
+    elif rule == "min_s":
+        return setups_only(candidates, station, instance.setups, reverse=False)
+    else:
+        print("No valid rule selected!")
+
+
+def setups_plus_processing(cln, station, tsu, t, reverse=None):
     lst = []
     for task in cln:
         if station:
-            # s = time between last task assigned to the actual open station and the candidate task
+            # time between last task assigned to the actual open station and the candidate task
             value = t[task] + tsu[station[-1]][task]
             lst.append((task, value))
         elif not station:
-            # s = mean of all setup times between task an all other tasks
+            # mean of all setup times between task an all other tasks
             value = t[task] + sum(tsu[task]) / (len(tsu[task])-1)
             lst.append((task, value))
-    return sorted(lst, key=lambda x: x[1], reverse=True)
+    return sorted(lst, key=lambda x: x[1], reverse=reverse)
 
 
-def min_ts(cln, station, t, tsu):
+def setups_only(cln, station, tsu, reverse=None):
     lst = []
     for task in cln:
         if station:
-            # s = time between last task assigned to the actual open station and the candidate task
-            value = t[task] + tsu[task][station[-1]]
-            lst.append((task, value))
-        elif not station:
-            # s = mean of all setup times between task an all other tasks
-            value = t[task] + sum(tsu[task]) / (len(tsu[task])-1)
-            lst.append((task, value))
-    return sorted(lst, key=lambda x: x[1])
-
-
-def max_s(cln, station, tsu):
-    lst = []
-    for task in cln:
-        if station:
-            # s = time between last task assigned to the actual open station and the candidate task
-            value = tsu[station[-1]][task]
-            # print('t(task %d) = tsu[station[-1]][task]:' % task, tsu[station[-1]][task])
-            lst.append((task, value))
-        elif not station:
-            # s = mean of all setup times between task an all other tasks
-            value = sum(tsu[task]) / (len(tsu[task])-1)
-            # print('t(task %d) = sum(tsu[task]) / [len(tsu[task])-1]:' % task, sum(tsu[task]), '/', (len(tsu[task]) - 1))
-            lst.append((task, value))
-    return sorted(lst, key=lambda x: x[1], reverse=True)
-
-
-def min_s(cln, station, tsu):
-    lst = []
-    for task in cln:
-        if station:
-            # s = time between last task assigned to the actual open station and the candidate task
+            # time between last task assigned to the actual open station and the candidate task
             value = tsu[station[-1]][task]
             lst.append((task, value))
         elif not station:
-            # s = mean of all setup times between task an all other tasks
+            # mean of all setup times between task an all other tasks
             value = sum(tsu[task]) / (len(tsu[task])-1)
             lst.append((task, value))
-    return sorted(lst, key=lambda x: x[1])
+    return sorted(lst, key=lambda x: x[1], reverse=reverse)

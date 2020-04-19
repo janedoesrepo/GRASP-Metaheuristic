@@ -1,10 +1,12 @@
 import pandas as pd
 
-def create_instances() -> list:
+
+def create_instances(quantity=10) -> list:
     graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
               "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
     variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
-    instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, 5)]
+    instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in
+                 range(1, quantity)]
     return instances
 
 
@@ -85,5 +87,5 @@ class Instance:
             [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
             for heuristic_name, solution in self.solutions.items()]
         df = pd.DataFrame(data, columns=["Instance", "Heuristic", "Number of Stations", "Best Solution", "ARD", "Runtime"])
-        df.to_csv(f"results/{self.name}.csv", sep=';', index=False)
+        df.to_csv(f"results/{self.graph}/{self.name}.csv", sep=';', index=False)
         return best_solution

@@ -1,6 +1,5 @@
 from time import perf_counter
 import xlsxwriter
-import pandas as pd
 
 from datahandler.Instance import create_instances
 from methods.Heuristic import create_heuristics
@@ -83,8 +82,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # import timeit
-    # setup = "from datahandler.test import create_instances"
-    # print(timeit.timeit("create_instances()", setup=setup, number=100000))
-
     main()

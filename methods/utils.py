@@ -1,10 +1,9 @@
 def compute_station_time(station, processing_time, setups):
-    if not station:
-        return 0
-    else:
-        t_station = 0
-        for task in station:
 
+    t_station = 0
+
+    if station:
+        for task in station:
             # task is first in station
             if station.index(task) == 0:
                 t_station += processing_time[task]
@@ -19,7 +18,7 @@ def compute_station_time(station, processing_time, setups):
             else:
                 pred = station[station.index(task) - 1]
                 t_station += processing_time[task] + setups[pred][task]
-        return t_station
+    return t_station
 
 
 def get_candidates(instance, station_candidates, relations, station):
