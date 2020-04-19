@@ -25,10 +25,6 @@ def f_balanced(solution, instance):
     return result
 
 
-def var_balanced(x, y):
-    return x-y
-
-
 def f_imbalanced(solution, instance, eps=0.001):
     # MAXIMIZE objective to create imbalanced solutions
     result = 0
@@ -37,11 +33,15 @@ def f_imbalanced(solution, instance, eps=0.001):
     return result
 
 
+def var_balanced(x, y):
+    return x-y
+
+
 def var_imbalanced(x, y):
     return y-x
 
 
-def improve_solution(solution, instance):
+def improve_solution(solution, instance, prob_threshold=0.75):
 
     pi = np.concatenate(solution)   # a flattened version of the solution
     num_tasks = len(pi)
@@ -50,15 +50,11 @@ def improve_solution(solution, instance):
     # initialise current sequence
     curr_seq = pi.copy()
 
-    # set threshold for choosing objective functions
-    prob_threshold = 0.75
-
     while True:
 
-        # initialise dictionary of feasible_exchanges
         feasible_exchanges = {}
 
-        # choose balanced workload objective function with probability prob_threshold
+        # choose balanced workload objective function with probability threshold
         if np.random.random() <= prob_threshold:
             f = f_balanced
             var = var_balanced

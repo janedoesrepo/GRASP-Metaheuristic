@@ -1,7 +1,8 @@
+import pandas as pd
+
 def create_instances() -> list:
     graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
               "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
-    graphs = ["ARC83.IN2"]
     variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
     instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, 5)]
     return instances
@@ -69,3 +70,20 @@ class Instance:
                 self.setups.append(line)
 
             print(f"*Import of {self.name} successful!*")
+
+    def postprocess(self):
+        # find best solution BS
+        best_solution = min([solution['m'] for _, solution in self.solutions.items()])
+
+        # compute Average Relative Deviation for each solution
+        for _, solution in self.solutions.items():
+            ARD = 100 * ((solution['m'] - best_solution) / best_solution)
+            solution['ARD'] = ARD
+
+        print(f"Writing results_new to {self.name}.csv")
+        data = [
+            [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
+            for heuristic_name, solution in self.solutions.items()]
+        df = pd.DataFrame(data, columns=["Instance", "Heuristic", "Number of Stations", "Best Solution", "ARD", "Runtime"])
+        df.to_csv(f"results/{self.name}.csv", sep=';', index=False)
+        return best_solution
