@@ -20,4 +20,6 @@ vc=14.1=h0510ff6_4
 vs2015_runtime=14.15.26706=h3a45250_0
 wheel=0.33.1=py37_0
 wincertstore=0.2=py37_0
-xlsxwriter=1.1.6=py_0
+
+xlsxwriter~=1.2.8
+numpy~=1.18.1

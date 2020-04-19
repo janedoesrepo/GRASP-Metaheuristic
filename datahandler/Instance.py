@@ -1,0 +1,71 @@
+def create_instances() -> list:
+    graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
+              "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
+    graphs = ["ARC83.IN2"]
+    variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
+    instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, 5)]
+    return instances
+
+
+class Instance:
+
+    def __init__(self, graph, variant, ident):
+        self.name = f"{graph}_{variant}_EJ{ident}"
+        self.graph = graph
+        self.variant = variant
+        self.filename = f"{self.name}.txt"
+
+        self.num_tasks = None
+        self.num_relations = None
+        self.cycle_time = None
+
+        self.task_ids = None
+
+        self.processing_times = None
+        self.relations = None
+        self.setups = None
+
+        self.solutions = dict()
+
+    def load(self):
+        """ Import-function for the data set of Martino and Pastor (2010)
+                The data is available at https://www.assembly-line-balancing.de/sualbsp
+
+                line 1:                     n; number of tasks
+                line 2:                     p; number of direct precedence relations
+                line 3:                     c; cycle time
+                lines 4 to 4+n-1:           cl, t; id task, processing time
+                lines 4+n to 4+n+p-1:       relations; direct precedence relations in form i,j
+                lines 4+n+p to 4+2n+p-1:    tsu; setup times
+            """
+
+        with open("data/" + self.filename, "r") as file:
+
+            # read first three lines
+            self.num_tasks = int(file.readline())
+            self.num_relations = int(file.readline())
+            self.cycle_time = int(file.readline())
+
+            # create task ids
+            self.task_ids = list(range(self.num_tasks))
+
+            # read processing times
+            self.processing_times = []
+            for _ in range(self.num_tasks):
+                _, time = file.readline().split(',')
+                self.processing_times.append(int(time))
+
+            # read precedence relations
+            self.relations = [[] for _ in range(self.num_tasks)]
+            for _ in range(self.num_relations):
+                a, b = file.readline().split(',')
+                self.relations[int(b)].append(int(a))
+
+            # read setup times
+            self.setups = []
+            for _ in range(self.num_tasks):
+                line = file.readline().split(',')
+                line = [int(element) for element in line]
+                self.setups.append(line)
+
+            print(f"*Import of {self.name} successful!*")
