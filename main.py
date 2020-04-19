@@ -38,12 +38,11 @@ def main():
         instance.solutions['GRASP-5'] = dict(m=len(solution), rt=runtime, sol=solution)
 
         print(f"Applying GRASP-10 meta heuristic to {instance.name}")
-        num_iter = 10
         t5 = perf_counter()
         solution = run_grasp(instance, num_iter=10)
         t6 = perf_counter()
         runtime = t6-t5
-        instance.solution['GRASP-10'] = dict(m=len(solution), rt=runtime, sol=solution)
+        instance.solutions['GRASP-10'] = dict(m=len(solution), rt=runtime, sol=solution)
 
         print(f"Postprocessing {instance.name}")
         best_solution = instance.postprocess()

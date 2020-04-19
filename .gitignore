@@ -1,7 +1,6 @@
 data/*.txt
 data/*.doc
-results/*.csv
-results/*.xlsx
+results/
 
 # Pycharm
 .idea/

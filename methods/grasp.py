@@ -75,7 +75,7 @@ def run_grasp(instance, num_iter=5, alpha=0.3):
 
     for i in range(1, num_iter+1):
 
-        print(f"\tConstructing solution {i}")
+        # print(f"\tConstructing solution {i}")
         constructed_solution = construct_solution(instance, alpha)
         constructed_solutions.append(constructed_solution)
 

@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 
 def create_instances(quantity=10) -> list:
@@ -82,10 +83,14 @@ class Instance:
             ARD = 100 * ((solution['m'] - best_solution) / best_solution)
             solution['ARD'] = ARD
 
-        print(f"Writing results_new to {self.name}.csv")
+        print(f"Writing results to {self.name}.csv")
+
+        result_dir = Path(f"results/{self.graph}/")
+        result_dir.mkdir(exist_ok=True)
+
         data = [
             [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
             for heuristic_name, solution in self.solutions.items()]
         df = pd.DataFrame(data, columns=["Instance", "Heuristic", "Number of Stations", "Best Solution", "ARD", "Runtime"])
-        df.to_csv(f"results/{self.graph}/{self.name}.csv", sep=';', index=False)
+        df.to_csv(result_dir/f"{self.name}.csv", sep=';', index=False)
         return best_solution
