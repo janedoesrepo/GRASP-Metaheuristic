@@ -1,56 +1,36 @@
 from time import perf_counter
 import xlsxwriter
 
-from datahandler.Instance import create_instances
-from methods.Heuristic import create_heuristics
+from datahandler.Instance import Instance
+from methods.Heuristic import Heuristic
 from methods.grasp import run_grasp
+from typing import List
 
 
-def main():
-    print('-'*25)
+def create_instances(quantity: int = 10) -> List[Instance]:
+    """Creates up to 10 instances of all possible combinations of graph and variant"""
+    
+    graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
+              "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
+    variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
+    instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, quantity+1)]
+    
+    return instances
 
-    instances = create_instances()
-    heuristics = create_heuristics()
 
-    # run experiments
-    solutions = {}
-    best_solutions = {}
-    for instance in instances:
+def create_heuristics() -> List[Heuristic]:
+    """Creates heuristic of all possible combinations of strategy and rule"""
+    
+    strategies = ["SH", "TH"]
+    rules = ["max_ts", "min_ts", "max_s", "min_s"]
+    heuristics = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
+    
+    return heuristics
 
-        t0 = perf_counter()
-        instance.load()
 
-        for heuristic in heuristics:
-            print(f"Applying {heuristic.name} to instance {instance.name}")
-            t1 = perf_counter()
-            solution = heuristic.apply(instance)
-            t2 = perf_counter()
-            runtime = t2-t1
-            instance.solutions[heuristic.name] = dict(m=len(solution), rt=runtime, sol=solution)
-
-        solutions[instance.name] = instance.solutions
-
-        print(f"Applying GRASP-5 meta heuristic to {instance.name}")
-        t3 = perf_counter()
-        solution = run_grasp(instance)
-        t4 = perf_counter()
-        runtime = t4-t3
-        instance.solutions['GRASP-5'] = dict(m=len(solution), rt=runtime, sol=solution)
-
-        print(f"Applying GRASP-10 meta heuristic to {instance.name}")
-        t5 = perf_counter()
-        solution = run_grasp(instance, num_iter=10)
-        t6 = perf_counter()
-        runtime = t6-t5
-        instance.solutions['GRASP-10'] = dict(m=len(solution), rt=runtime, sol=solution)
-
-        print(f"Postprocessing {instance.name}")
-        best_solution = instance.postprocess()
-        best_solutions[instance.name] = best_solution
-
-        print("Gesamtdauer:", perf_counter() - t0)
-        print("-" * 25, "\n")
-
+def export_results(solutions, best_solutions) -> None:
+    """Writes the solutions to an excel workbook"""
+    
     print("Writing all results to results.xlsx")
     # create a workbook and a worksheet
     workbook = xlsxwriter.Workbook('results/all_results.xlsx')
@@ -58,12 +38,12 @@ def main():
 
     # write headers in bold
     bold = workbook.add_format({'bold': 1})
-    worksheet.write('A1', 'Instanz', bold)
-    worksheet.write('B1', 'Prozedur', bold)
-    worksheet.write('C1', 'Stationszahl', bold)
+    worksheet.write('A1', 'Instance', bold)
+    worksheet.write('B1', 'Heuristic', bold)
+    worksheet.write('C1', 'Stations', bold)
     worksheet.write('D1', 'BS', bold)
     worksheet.write('E1', 'ARD', bold)
-    worksheet.write('F1', 'Laufzeit', bold)
+    worksheet.write('F1', 'Runtime', bold)
 
     row = 1
     for instance, apply_heuristic in solutions.items():
@@ -77,8 +57,65 @@ def main():
             row += 1
 
     workbook.close()
-    print("Computations successful")
+
+
+def run_experiments(instances: List[Instance], heuristics: List[Heuristic]):
+    
+    solutions = {}
+    best_solutions = {}
+    
+    for instance in instances:
+
+        t0 = perf_counter()
+        instance.load()
+
+        # Apply heuristics to instance
+        for heuristic in heuristics:
+            print(f"Applying {heuristic.name} to instance {instance.name}")
+            t1 = perf_counter()
+            solution = heuristic.apply(instance)
+            t2 = perf_counter()
+            runtime = t2-t1
+            instance.solutions[heuristic.name] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+
+        solutions[instance.name] = instance.solutions
+
+        print(f"Applying GRASP-5 meta heuristic to {instance.name}")
+        t3 = perf_counter()
+        solution = run_grasp(instance)
+        t4 = perf_counter()
+        runtime = t4-t3
+        instance.solutions['GRASP-5'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+
+        print(f"Applying GRASP-10 meta heuristic to {instance.name}")
+        t5 = perf_counter()
+        solution = run_grasp(instance, num_iter=10)
+        t6 = perf_counter()
+        runtime = t6-t5
+        instance.solutions['GRASP-10'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+
+        print(f"Postprocessing {instance.name}")
+        best_solution = instance.postprocess()
+        best_solutions[instance.name] = best_solution
+
+        print("Experiment Runtime:", perf_counter() - t0)
+        print("-" * 25, "\n")
+        
+    return solutions, best_solutions
+        
+
+def main(num_instances: int):
+
+    # Create instances and heuristics
+    instances = create_instances(quantity=num_instances)
+    heuristics = create_heuristics()
+
+    # run experiments
+    solutions, best_solutions = run_experiments(instances, heuristics)
+
+    # save experiments to disc
+    export_results(solutions, best_solutions)
 
 
 if __name__ == "__main__":
-    main()
+    main(1)

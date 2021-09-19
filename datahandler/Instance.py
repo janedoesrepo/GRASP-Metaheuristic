@@ -2,15 +2,6 @@ import pandas as pd
 from pathlib import Path
 
 
-def create_instances(quantity=10) -> list:
-    graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
-              "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
-    variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
-    instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in
-                 range(1, quantity)]
-    return instances
-
-
 class Instance:
 
     def __init__(self, graph, variant, ident):
@@ -43,7 +34,7 @@ class Instance:
                 lines 4+n+p to 4+2n+p-1:    tsu; setup times
             """
 
-        with open("data/" + self.filename, "r") as file:
+        with open("data/Instances/" + self.filename, "r") as file:
 
             # read first three lines
             self.num_tasks = int(file.readline())

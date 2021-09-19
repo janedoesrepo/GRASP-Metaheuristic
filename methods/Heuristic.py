@@ -1,13 +1,6 @@
 from. strategies import apply_strategy
 
 
-def create_heuristics() -> list:
-    strategies = ["SH", "TH"]
-    rules = ["max_ts", "min_ts", "max_s", "min_s"]
-    heuristics = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
-    return heuristics
-
-
 class Heuristic:
     """ Heuristic rules for task assigment
 

@@ -1,4 +1,4 @@
-data/*.txt
+data/Instances/*.txt
 data/*.doc
 results/
 
