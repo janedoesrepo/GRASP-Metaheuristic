@@ -2,6 +2,12 @@ import pandas as pd
 from pathlib import Path
 
 
+def compute_ARD(solution, best_solution) -> float:
+    """Compute the average relative deviation of a solution"""
+    ARD = 100 * ((solution['m'] - best_solution) / best_solution)
+    return ARD
+    
+
 class Instance:
 
     def __init__(self, graph, variant, ident):
@@ -20,7 +26,7 @@ class Instance:
         self.relations = None
         self.setups = None
 
-        self.solutions = dict()
+        self.solutions = {}
 
     def load(self):
         """ Import-function for the data set of Martino and Pastor (2010)
@@ -71,8 +77,7 @@ class Instance:
 
         # compute Average Relative Deviation for each solution
         for _, solution in self.solutions.items():
-            ARD = 100 * ((solution['m'] - best_solution) / best_solution)
-            solution['ARD'] = ARD
+            solution['ARD'] = compute_ARD(solution, best_solution)
 
         print(f"Writing results to {self.name}.csv")
 

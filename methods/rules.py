@@ -1,9 +1,12 @@
-def apply_rule(rule, instance, candidates, station):
+from typing import List
+
+
+def apply_rule(rule, instance, candidates, station) -> List:
     if rule == "max_ts":
         return setups_plus_processing(candidates, station, instance.setups, instance.processing_times, reverse=True)
     elif rule == "min_ts":
         return setups_plus_processing(candidates, station, instance.setups, instance.processing_times, reverse=False)
-    elif rule == "max_s":
+    elif rule == "max_s":   
         return setups_only(candidates, station, instance.setups, reverse=True)
     elif rule == "min_s":
         return setups_only(candidates, station, instance.setups, reverse=False)
@@ -11,7 +14,7 @@ def apply_rule(rule, instance, candidates, station):
         print("No valid rule selected!")
 
 
-def setups_plus_processing(cln, station, tsu, t, reverse=None):
+def setups_plus_processing(cln, station, tsu, t, reverse=None) -> List:
     lst = []
     for task in cln:
         if station:
@@ -25,7 +28,7 @@ def setups_plus_processing(cln, station, tsu, t, reverse=None):
     return sorted(lst, key=lambda x: x[1], reverse=reverse)
 
 
-def setups_only(cln, station, tsu, reverse=None):
+def setups_only(cln, station, tsu, reverse=None) -> List:
     lst = []
     for task in cln:
         if station:

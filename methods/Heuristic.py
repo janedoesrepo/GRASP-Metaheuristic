@@ -16,7 +16,7 @@ class Heuristic:
 
      When we refer to heuristic rule SH-max_ts we mean a station oriented heuristic that selects next task ordering
      candidate tasks (those whose predecessors have already been assigned and can fit in the actual open station) by
-     MAXimum processing time plus Setup time.
+     MAXimum processing time plus setup time.
 
      Hence, the list of heuristic that have been defined and tested are:
       - SH-max_ts, SH-max_s, SH-min_ts, SH-min_s and
