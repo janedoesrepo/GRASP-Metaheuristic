@@ -3,15 +3,20 @@ import xlsxwriter
 
 from datahandler.Instance import Instance
 from methods.Heuristic import Heuristic
+from methods.heuristic_v2 import Heuristic_v2
 from methods.grasp import run_grasp
 from typing import List
+
+from methods.rules_v2 import MaxTSOrdering, MinTSOrdering, MaxSOrdering, MinSOrdering
 
 
 def create_instances(quantity: int = 10) -> List[Instance]:
     """Creates up to 10 instances of all possible combinations of graph and variant"""
     
-    graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
-              "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
+    graphs = [#"ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
+              "MITCHELL.IN2",
+              # "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"
+              ]
     variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
     instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, quantity+1)]
     
@@ -21,9 +26,17 @@ def create_instances(quantity: int = 10) -> List[Instance]:
 def create_heuristics() -> List[Heuristic]:
     """Creates heuristic of all possible combinations of strategy and rule"""
     
+    # old version
     strategies = ["SH", "TH"]
     rules = ["max_ts", "min_ts", "max_s", "min_s"]
-    heuristics = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
+    heuristics_v1 = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
+    
+    # new version
+    rules_v2 = [MaxTSOrdering(), MinTSOrdering(), MaxSOrdering(), MinSOrdering()]
+    heuristics_v2 = [Heuristic_v2(strategy, rule) for strategy in strategies for rule in rules_v2]
+    
+    # choose version
+    heuristics = heuristics_v2
     
     return heuristics
 

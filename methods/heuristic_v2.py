@@ -1,7 +1,8 @@
-from .strategies import apply_strategy
+from methods.rules_v2 import TaskOrderingRule
+from .strategies_v2 import apply_strategy
 
 
-class Heuristic:
+class Heuristic_v2:
     """ Heuristic rules for task assigment
 
      We differ between two types of strategies:
@@ -23,8 +24,8 @@ class Heuristic:
       - TH-max_ts, TH-max_s, TH-min_ts, TH-min_s.
      """
 
-    def __init__(self, strategy, rule: str):
-        self.name = f"{strategy}_{rule}"
+    def __init__(self, strategy, rule: TaskOrderingRule):
+        self.name = f"{strategy}_{rule.__class__.__name__}"
         self.strategy = strategy
         self.rule = rule
 

@@ -1,6 +1,6 @@
 from copy import deepcopy
+from .rules_v2 import TaskOrderingRule
 from .utils import get_candidates, assign_task, compute_station_time
-from .rules import apply_rule
 
 
 def apply_strategy(heuristic, instance):
@@ -17,7 +17,7 @@ def apply_strategy(heuristic, instance):
         print("No valid strategy selected!")
 
 
-def station_oriented(candidate_list, relations, ordering_rule, instance):
+def station_oriented(candidate_list, relations, ordering_rule: TaskOrderingRule, instance):
 
     stations = [[]]
     curr_station = stations[-1]
@@ -34,7 +34,7 @@ def station_oriented(candidate_list, relations, ordering_rule, instance):
             station_candidates = get_candidates(instance, candidate_list, relations, curr_station)
 
         # order candidates
-        station_candidates = apply_rule(ordering_rule, instance, station_candidates, curr_station)
+        station_candidates = ordering_rule.order_tasks(station_candidates, curr_station, instance)
 
         # assign first task in CL_n to actual open station
         assign_task(curr_station, station_candidates[0][0], candidate_list, relations)
@@ -42,7 +42,7 @@ def station_oriented(candidate_list, relations, ordering_rule, instance):
     return stations
 
 
-def task_oriented(candidate_list, relations, ordering_rule, instance):
+def task_oriented(candidate_list, relations, ordering_rule: TaskOrderingRule, instance):
 
     stations = [[]]
     curr_station = stations[-1]
@@ -57,7 +57,7 @@ def task_oriented(candidate_list, relations, ordering_rule, instance):
                 station_candidates.append(task)
 
         # order candidate tasks
-        station_candidates = apply_rule(ordering_rule, instance, station_candidates, curr_station)
+        station_candidates = ordering_rule.order_tasks(station_candidates, curr_station, instance)
 
         # assign first task in CL_n to first station it fits in
         temp_rel = relations[station_candidates[0][0]][:]
