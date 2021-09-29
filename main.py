@@ -1,3 +1,4 @@
+from methods.strategies_v2 import StationOrientedStrategy, TaskOrientedStrategy
 from time import perf_counter
 import xlsxwriter
 
@@ -32,8 +33,9 @@ def create_heuristics() -> List[Heuristic]:
     heuristics_v1 = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
     
     # new version
+    strategies_v2 = [StationOrientedStrategy(), TaskOrientedStrategy()]
     rules_v2 = [MaxTSOrdering(), MinTSOrdering(), MaxSOrdering(), MinSOrdering()]
-    heuristics_v2 = [Heuristic_v2(strategy, rule) for strategy in strategies for rule in rules_v2]
+    heuristics_v2 = [Heuristic_v2(strategy, rule) for strategy in strategies_v2 for rule in rules_v2]
     
     # choose version
     heuristics = heuristics_v2

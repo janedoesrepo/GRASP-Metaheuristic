@@ -1,5 +1,5 @@
 from methods.rules_v2 import TaskOrderingRule
-from .strategies_v2 import apply_strategy
+from .strategies_v2 import OptimizationStrategy
 
 
 class Heuristic_v2:
@@ -24,11 +24,11 @@ class Heuristic_v2:
       - TH-max_ts, TH-max_s, TH-min_ts, TH-min_s.
      """
 
-    def __init__(self, strategy, rule: TaskOrderingRule):
-        self.name = f"{strategy}_{rule.__class__.__name__}"
+    def __init__(self, strategy: OptimizationStrategy, rule: TaskOrderingRule):
+        self.name = f"{strategy.__class__.__name__}_{rule.__class__.__name__}"
         self.strategy = strategy
         self.rule = rule
 
     def apply(self, instance):
-        stations = apply_strategy(self, instance)
+        stations = self.strategy.solve_instance(instance, self.rule)
         return stations
