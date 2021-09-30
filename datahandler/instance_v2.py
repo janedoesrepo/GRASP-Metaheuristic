@@ -1,5 +1,5 @@
 import pandas as pd
-from pathlib import Path
+import pathlib
 
 
 def compute_ARD(solution, best_solution) -> float:
@@ -72,7 +72,8 @@ class Instance_v2:
 
         print(f"Writing results to {self.name}.csv")
 
-        result_dir = Path(f"results/{self.graph}/")
+        # Set result dir and create it, if it does not exist
+        result_dir = pathlib.Path(f"results/{self.graph}/")
         result_dir.mkdir(exist_ok=True)
 
         # Write result to file

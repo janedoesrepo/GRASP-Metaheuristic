@@ -1,3 +1,4 @@
+from datahandler.instance_v2 import Instance_v2
 from methods.rules_v2 import TaskOrderingRule
 from .strategies_v2 import OptimizationStrategy
 
@@ -29,6 +30,6 @@ class Heuristic_v2:
         self.ordering_rule = rule
         self.name = f"{strategy.__class__.__name__}_{rule.__class__.__name__}"
 
-    def apply(self, instance):
+    def apply(self, instance: Instance_v2):
         stations = self.strategy.solve_instance(instance, self.ordering_rule)
         return stations
