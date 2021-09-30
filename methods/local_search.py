@@ -1,5 +1,7 @@
+from datahandler.Instance import Instance
 import numpy as np
 from .utils import compute_station_time
+from typing import List
 
 
 def reassemble(sequence, instance):
@@ -41,13 +43,13 @@ def var_imbalanced(x, y):
     return y-x
 
 
-def improve_solution(solution, instance, prob_threshold=0.75):
+def improve_solution(solution: List[List[int]], instance: Instance, prob_threshold: float = 0.75) -> List[List[int]]:
 
     pi = np.concatenate(solution)   # a flattened version of the solution
     num_tasks = len(pi)
     # print(f"Sequence pi: {pi}")
 
-    # initialise current sequence
+    # initialize current sequence
     curr_seq = pi.copy()
 
     while True:

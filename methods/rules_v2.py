@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datahandler.Instance import Instance
 from typing import List, Tuple
 
 #TODO: Add typehints for method parameters
@@ -14,34 +15,34 @@ class TaskOrderingRule(ABC):
     could be written in a functional adaption of the Strategy Pattern and passed as functions.
     """      
     @abstractmethod
-    def order_tasks(self, candidates, station, instance) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates, station, instance: Instance) -> List[Tuple[int, float]]:
         pass
     
     
 class MaxTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time descending"""
-    def order_tasks(self, candidates, station, instance) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates, station, instance: Instance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_plus_processing(candidates, station, instance.setups, instance.processing_times)
         return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
     
     
 class MinTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time ascending"""
-    def order_tasks(self, candidates, station, instance) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates, station, instance: Instance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_plus_processing(candidates, station, instance.setups, instance.processing_times)
         return sorted(candidate_tasks, key=lambda x: x[1])
     
     
 class MaxSOrdering(TaskOrderingRule):
     """Orders tasks by setup time descending"""
-    def order_tasks(self, candidates, station, instance) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates, station, instance: Instance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_only(candidates, station, instance.setups)
         return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
     
     
 class MinSOrdering(TaskOrderingRule):
     """Orders tasks by setup time ascending"""
-    def order_tasks(self, candidates, station, instance) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates, station, instance: Instance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_only(candidates, station, instance.setups)
         return sorted(candidate_tasks, key=lambda x: x[1])
         
