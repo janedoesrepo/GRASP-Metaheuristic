@@ -12,6 +12,9 @@ class OptimizationStrategy:
     def solve_instance(self, instance: Instance_v2, ordering_rule: TaskOrderingRule) -> List:
         pass
     
+    def __str__(self):
+        return self.__class__.__name__
+    
 
 class StationOrientedStrategy(OptimizationStrategy):
     "Implements the station oriented optimization strategy"

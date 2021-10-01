@@ -28,7 +28,7 @@ class Heuristic_v2:
     def __init__(self, strategy: OptimizationStrategy, rule: TaskOrderingRule):
         self.strategy = strategy
         self.ordering_rule = rule
-        self.name = f"{strategy.__class__.__name__}_{rule.__class__.__name__}"
+        self.name = f"{strategy}_{rule}"
 
     def apply(self, instance: Instance_v2):
         stations = self.strategy.solve_instance(instance, self.ordering_rule)
