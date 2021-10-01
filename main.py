@@ -1,4 +1,4 @@
-from methods.strategies_v2 import StationOrientedStrategy, TaskOrientedStrategy
+from methods.strategies_v2 import OptimizationStrategy, StationOrientedStrategy, TaskOrientedStrategy
 from time import perf_counter
 import xlsxwriter
 
@@ -9,7 +9,7 @@ from methods.heuristic_v2 import Heuristic_v2
 from methods.grasp import run_grasp
 from typing import List
 
-from methods.rules_v2 import MaxTSOrdering, MinTSOrdering, MaxSOrdering, MinSOrdering
+from methods.rules_v2 import MaxTSOrdering, MinTSOrdering, MaxSOrdering, MinSOrdering, TaskOrderingRule
 
 
 def create_instances(version: str = "stable", quantity: int = 10) -> List[Instance]:
@@ -39,20 +39,19 @@ def create_instances(version: str = "stable", quantity: int = 10) -> List[Instan
 
 
 def create_heuristics(version: str = "stable") -> List[Heuristic]:
-    """Creates heuristic of all possible combinations of strategy and rule"""
+    """Creates a list of heuristics of all possible combinations of optimization strategy and ordering rule"""
     
     # choose version
     if version in ["stable", "v1"]:
-        # old version
         strategies = ["SH", "TH"]
         rules = ["max_ts", "min_ts", "max_s", "min_s"]
         heuristics = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
         
     elif version == "v2":
-        # new version
-        strategies_v2 = [StationOrientedStrategy(), TaskOrientedStrategy()]
-        rules_v2 = [MaxTSOrdering(), MinTSOrdering(), MaxSOrdering(), MinSOrdering()]
-        heuristics= [Heuristic_v2(strategy, rule) for strategy in strategies_v2 for rule in rules_v2]
+        """With __subclasses__ we can add a new strategy or rule without having to change the code here"""
+        strategies = OptimizationStrategy.__subclasses__()
+        orderings  = TaskOrderingRule.__subclasses__()          
+        heuristics = [Heuristic_v2(strategy(), ordering()) for strategy in strategies for ordering in orderings]
         
     else:
         raise ValueError(f"Version {version} does not exist. Current versions are 'v1' and 'v2'.")
