@@ -1,18 +1,16 @@
-from methods.strategies_v2 import OptimizationStrategy, StationOrientedStrategy, TaskOrientedStrategy
 from time import perf_counter
 import xlsxwriter
 
-from datahandler.Instance import Instance
-from datahandler.instance_v2 import Instance_v2
-from methods.Heuristic import Heuristic
-from methods.heuristic_v2 import Heuristic_v2
-from methods.grasp import run_grasp
+from app_v2.graph import GraphInstance
+from app_v2.methods.heuristic import Heuristic
+from app_v2.methods.grasp import run_grasp
 from typing import List
 
-from methods.rules_v2 import MaxTSOrdering, MinTSOrdering, MaxSOrdering, MinSOrdering, TaskOrderingRule
+from app_v2.methods.rules import TaskOrderingRule
+from app_v2.methods.strategies import OptimizationStrategy
 
 
-def create_instances(version: str = "stable", quantity: int = 10) -> List[Instance]:
+def create_instances(quantity: int = 10) -> List[GraphInstance]:
     """Creates up to 10 instances of all possible combinations of graph and variant"""
     
     graphs = [#"ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
@@ -20,41 +18,18 @@ def create_instances(version: str = "stable", quantity: int = 10) -> List[Instan
               # "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"
               ]
     variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
-    
-    # choose version
-    if version in ["stable", "v1"]:
-        # old version
-        instances = [Instance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, quantity+1)]
-        
-    elif version == "v2":
-        # new version
-        instances = [Instance_v2(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, quantity+1)]
-    
-    else:
-        raise ValueError(f"Version {version} does not exist. Current versions are 'v1' and 'v2'.")
-        
-    instances = instances
+    instances = [GraphInstance(graph, variant, ident) for graph in graphs for variant in variants for ident in range(1, quantity+1)]
     
     return instances
 
 
-def create_heuristics(version: str = "stable") -> List[Heuristic]:
+def create_heuristics() -> List[Heuristic]:
     """Creates a list of heuristics of all possible combinations of optimization strategy and ordering rule"""
     
-    # choose version
-    if version in ["stable", "v1"]:
-        strategies = ["SH", "TH"]
-        rules = ["max_ts", "min_ts", "max_s", "min_s"]
-        heuristics = [Heuristic(strategy, rule) for strategy in strategies for rule in rules]
-        
-    elif version == "v2":
-        """With __subclasses__ we can add a new strategy or rule without having to change the code here"""
-        strategies = OptimizationStrategy.__subclasses__()
-        orderings  = TaskOrderingRule.__subclasses__()          
-        heuristics = [Heuristic_v2(strategy(), ordering()) for strategy in strategies for ordering in orderings]
-        
-    else:
-        raise ValueError(f"Version {version} does not exist. Current versions are 'v1' and 'v2'.")
+    """With __subclasses__ we can add a new strategies and rules without having to change the code here"""
+    strategies = OptimizationStrategy.__subclasses__()
+    orderings  = TaskOrderingRule.__subclasses__()          
+    heuristics = [Heuristic(strategy(), ordering()) for strategy in strategies for ordering in orderings]
     
     return heuristics
 
@@ -64,7 +39,7 @@ def export_results(solutions, best_solutions) -> None:
     
     print("Writing all results to results.xlsx")
     # create a workbook and a worksheet
-    workbook = xlsxwriter.Workbook('results/all_results.xlsx')
+    workbook = xlsxwriter.Workbook('app_v2/results/all_results.xlsx')
     worksheet = workbook.add_worksheet()
 
     # write headers in bold
@@ -90,7 +65,7 @@ def export_results(solutions, best_solutions) -> None:
     workbook.close()
 
 
-def run_experiments(instances: List[Instance], heuristics: List[Heuristic]):
+def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic]):
     
     solutions = {}
     best_solutions = {}
@@ -135,11 +110,11 @@ def run_experiments(instances: List[Instance], heuristics: List[Heuristic]):
     return solutions, best_solutions
         
 
-def main(version, num_instances: int):
+def main(num_instances: int):
 
     # Create instances and heuristics
-    instances = create_instances(version=version, quantity=num_instances)
-    heuristics = create_heuristics(version=version)
+    instances = create_instances(quantity=num_instances)
+    heuristics = create_heuristics()
 
     # run experiments
     solutions, best_solutions = run_experiments(instances, heuristics)
@@ -149,4 +124,4 @@ def main(version, num_instances: int):
 
 
 if __name__ == "__main__":
-    main("v2", 1)
+    main(1)

@@ -1,5 +1,7 @@
 import pandas as pd
-from pathlib import Path
+import pathlib
+from dataclasses import dataclass, field
+from typing import List
 
 
 def compute_ARD(solution, best_solution) -> float:
@@ -8,25 +10,25 @@ def compute_ARD(solution, best_solution) -> float:
     return ARD
     
 
-class Instance:
+@dataclass()
+class Task:
+    id: int
+    processing_time: int
+    predecessors: List[int] = field(default_factory=list, init=False)
+    setup_times: List[int] = field(default_factory=list, init=False)
+
+
+class GraphInstance:
 
     def __init__(self, graph, variant, ident):
-        self.name = f"{graph}_{variant}_EJ{ident}"
         self.graph = graph
         self.variant = variant
+        
+        self.name = f"{graph}_{variant}_EJ{ident}"
         self.filename = f"{self.name}.txt"
 
-        self.num_tasks = None
-        self.num_relations = None
-        self.cycle_time = None
+        self.tasks: List[Task] = []
 
-        self.task_ids = None
-
-        self.processing_times = None
-        self.relations = None
-        self.setups = None
-
-        self.solutions = {}
 
     def load(self):
         """ Import-function for the data set of Martino and Pastor (2010)
@@ -43,32 +45,25 @@ class Instance:
         with open("data/Instances/" + self.filename, "r") as file:
 
             # read first three lines
-            self.num_tasks = int(file.readline())
-            self.num_relations = int(file.readline())
-            self.cycle_time = int(file.readline())
-
-            # create task ids
-            self.task_ids = list(range(self.num_tasks))
-
-            # read processing times
-            self.processing_times = []
-            for _ in range(self.num_tasks):
-                _, time = file.readline().split(',')
-                self.processing_times.append(int(time))
-
-            # read precedence relations
-            self.relations = [[] for _ in range(self.num_tasks)]
-            for _ in range(self.num_relations):
-                a, b = file.readline().split(',')
-                self.relations[int(b)].append(int(a))
-
-            # read setup times
-            self.setups = []
-            for _ in range(self.num_tasks):
-                line = file.readline().split(',')
-                line = [int(element) for element in line]
-                self.setups.append(line)
-
+            num_tasks = int(file.readline())
+            num_relations = int(file.readline())
+            self.cycle_time = int(file.readline())                
+            
+            # Create tasks with id and processing times
+            for _ in range(num_tasks):
+                task_id, time = file.readline().split(',')
+                self.tasks.append(Task(task_id, time))
+                
+            # Add predecessor ids to each task        
+            for _ in range(num_relations):
+                predecessor, task_id = file.readline().split(',')
+                self.tasks[int(task_id)].predecessors.append(predecessor)
+            
+            # Setup times is a matrice of dim num_tasks x num_tasks
+            for i in range(num_tasks):
+                setup_times_i = file.readline().split(',')
+                self.tasks[i].setup_times = list(map(int, setup_times_i))
+                
             print(f"*Import of {self.name} successful!*")
 
     def postprocess(self):
@@ -81,9 +76,11 @@ class Instance:
 
         print(f"Writing results to {self.name}.csv")
 
-        result_dir = Path(f"results/{self.graph}/")
+        # Set result dir and create it, if it does not exist
+        result_dir = pathlib.Path(f"results/{self.graph}/")
         result_dir.mkdir(exist_ok=True)
 
+        # Write result to file
         data = [
             [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
             for heuristic_name, solution in self.solutions.items()]

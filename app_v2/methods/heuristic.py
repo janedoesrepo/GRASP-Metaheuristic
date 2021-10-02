@@ -1,9 +1,9 @@
-from datahandler.instance_v2 import Instance_v2
-from methods.rules_v2 import TaskOrderingRule
-from .strategies_v2 import OptimizationStrategy
+from app_v2.graph import GraphInstance
+from app_v2.methods.rules import TaskOrderingRule
+from app_v2.methods.strategies import OptimizationStrategy
 
 
-class Heuristic_v2:
+class Heuristic:
     """ Heuristic rules for task assigment
 
      We differ between two types of optimization strategies:
@@ -30,6 +30,6 @@ class Heuristic_v2:
         self.ordering_rule = rule
         self.name = f"{strategy}_{rule}"
 
-    def apply(self, instance: Instance_v2):
+    def apply(self, instance: GraphInstance):
         stations = self.strategy.solve_instance(instance, self.ordering_rule)
         return stations

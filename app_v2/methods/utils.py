@@ -1,4 +1,4 @@
-from datahandler.Instance import Instance
+from app_v2.graph import GraphInstance
 from typing import List
 
 
@@ -7,7 +7,7 @@ def compute_station_time(station: List[int], processing_times: List[int], setups
     
     t_station = 0
 
-    # empty station has station time 0
+    # an empty station has station time 0
     if not station:
         return t_station
     
@@ -33,7 +33,7 @@ def compute_station_time(station: List[int], processing_times: List[int], setups
     return t_station
 
 
-def get_candidates(instance: Instance, candidate_list: List[int], relations: List[List[int]], station: List[int]) -> List[int]:
+def get_candidates(instance: GraphInstance, candidate_list: List[int], relations: List[List[int]], station: List[int]) -> List[int]:
     """Check if any task in the candidate_list fulfills all precedence relations and fits in actual open station"""
 
     station_candidates = []

@@ -1,4 +1,4 @@
-from datahandler.Instance import Instance
+from app_v2.graph import GraphInstance
 import numpy as np
 from .utils import compute_station_time
 from typing import List
@@ -43,7 +43,7 @@ def var_imbalanced(x, y):
     return y-x
 
 
-def improve_solution(solution: List[List[int]], instance: Instance, prob_threshold: float = 0.75) -> List[List[int]]:
+def improve_solution(solution: List[List[int]], instance: GraphInstance, prob_threshold: float = 0.75) -> List[List[int]]:
 
     pi = np.concatenate(solution)   # a flattened version of the solution
     num_tasks = len(pi)

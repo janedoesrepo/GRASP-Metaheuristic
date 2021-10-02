@@ -1,4 +1,4 @@
-from datahandler.instance_v2 import Instance_v2
+from app_v2.graph import GraphInstance
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
@@ -15,7 +15,7 @@ class TaskOrderingRule(ABC):
     could be written in a functional adaption of the Strategy Pattern and passed as functions.
     """      
     @abstractmethod
-    def order_tasks(self, candidates: List[int], station: List[int], instance: Instance_v2) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
         pass
     
     def __str__(self):
@@ -24,28 +24,28 @@ class TaskOrderingRule(ABC):
     
 class MaxTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time descending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: Instance_v2) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_plus_processing(candidates, station, instance.setups, instance.processing_times)
         return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
     
     
 class MinTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time ascending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: Instance_v2) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_plus_processing(candidates, station, instance.setups, instance.processing_times)
         return sorted(candidate_tasks, key=lambda x: x[1])
     
     
 class MaxSOrdering(TaskOrderingRule):
     """Orders tasks by setup time descending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: Instance_v2) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_only(candidates, station, instance.setups)
         return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
     
     
 class MinSOrdering(TaskOrderingRule):
     """Orders tasks by setup time ascending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: Instance_v2) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
         candidate_tasks = setups_only(candidates, station, instance.setups)
         return sorted(candidate_tasks, key=lambda x: x[1])
         

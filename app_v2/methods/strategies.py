@@ -1,6 +1,6 @@
 from copy import deepcopy
-from datahandler.instance_v2 import Instance_v2
-from methods.rules_v2 import TaskOrderingRule
+from app_v2.graph import GraphInstance
+from app_v2.methods.rules import TaskOrderingRule
 from .utils import get_candidates, assign_task, compute_station_time
 from abc import ABC, abstractmethod
 from typing import List
@@ -9,7 +9,7 @@ from typing import List
 class OptimizationStrategy:
     """Abstract class that describes the strategy by which the solutions are optimized"""
     @abstractmethod
-    def solve_instance(self, instance: Instance_v2, ordering_rule: TaskOrderingRule) -> List:
+    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List:
         pass
     
     def __str__(self):
@@ -18,7 +18,7 @@ class OptimizationStrategy:
 
 class StationOrientedStrategy(OptimizationStrategy):
     "Implements the station oriented optimization strategy"
-    def solve_instance(self, instance: Instance_v2, ordering_rule: TaskOrderingRule) -> List:
+    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List:
 
         # copies are needed for in order to not change the original lists
         candidate_list = instance.task_ids.copy()
@@ -49,7 +49,7 @@ class StationOrientedStrategy(OptimizationStrategy):
 
 class TaskOrientedStrategy(OptimizationStrategy):
     "Implements the task oriented optimization strategy"
-    def solve_instance(self, instance: Instance_v2, ordering_rule: TaskOrderingRule) -> List:
+    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List:
 
         # copies are needed for in order to not change the original lists
         candidate_list = instance.task_ids.copy()

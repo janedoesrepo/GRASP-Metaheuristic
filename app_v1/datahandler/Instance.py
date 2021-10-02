@@ -1,5 +1,5 @@
 import pandas as pd
-import pathlib
+from pathlib import Path
 
 
 def compute_ARD(solution, best_solution) -> float:
@@ -8,14 +8,23 @@ def compute_ARD(solution, best_solution) -> float:
     return ARD
     
 
-class Instance_v2:
+class Instance:
 
     def __init__(self, graph, variant, ident):
+        self.name = f"{graph}_{variant}_EJ{ident}"
         self.graph = graph
         self.variant = variant
-        
-        self.name = f"{graph}_{variant}_EJ{ident}"
         self.filename = f"{self.name}.txt"
+
+        self.num_tasks = None
+        self.num_relations = None
+        self.cycle_time = None
+
+        self.task_ids = None
+
+        self.processing_times = None
+        self.relations = None
+        self.setups = None
 
         self.solutions = {}
 
@@ -30,7 +39,8 @@ class Instance_v2:
                 lines 4+n to 4+n+p-1:       relations; direct precedence relations in form i,j
                 lines 4+n+p to 4+2n+p-1:    tsu; setup times
             """
-
+        print("Aktueller Pfad:", Path())
+        
         with open("data/Instances/" + self.filename, "r") as file:
 
             # read first three lines
@@ -44,14 +54,14 @@ class Instance_v2:
             # read processing times
             self.processing_times = []
             for _ in range(self.num_tasks):
-                task_id, time = file.readline().split(',')
+                _, time = file.readline().split(',')
                 self.processing_times.append(int(time))
 
             # read precedence relations
             self.relations = [[] for _ in range(self.num_tasks)]
             for _ in range(self.num_relations):
-                i, j = file.readline().split(',')
-                self.relations[int(j)].append(int(i))
+                a, b = file.readline().split(',')
+                self.relations[int(b)].append(int(a))
 
             # read setup times
             self.setups = []
@@ -72,11 +82,9 @@ class Instance_v2:
 
         print(f"Writing results to {self.name}.csv")
 
-        # Set result dir and create it, if it does not exist
-        result_dir = pathlib.Path(f"results/{self.graph}/")
+        result_dir = Path(f"app_v1/results/{self.graph}/")
         result_dir.mkdir(exist_ok=True)
 
-        # Write result to file
         data = [
             [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
             for heuristic_name, solution in self.solutions.items()]

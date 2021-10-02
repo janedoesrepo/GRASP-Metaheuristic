@@ -2,7 +2,7 @@ from copy import deepcopy
 import numpy as np
 from .utils import get_candidates
 from .local_search import improve_solution
-from datahandler.Instance import Instance
+from app_v2.graph import GraphInstance
 from typing import List
 
 
@@ -24,7 +24,7 @@ def get_greedy_index(station_candidates: List[int], curr_station: List[int], pro
     return greedy
 
 
-def construct_solution(instance: Instance, alpha: float) -> List[List[int]]:
+def construct_solution(instance: GraphInstance, alpha: float) -> List[List[int]]:
 
     # copy task ids and precedence relations
     candidate_list = instance.task_ids.copy()
@@ -73,7 +73,7 @@ def construct_solution(instance: Instance, alpha: float) -> List[List[int]]:
     return stations
 
 
-def run_grasp(instance: Instance, num_iter: int = 5, alpha: float = 0.3) -> List[List[int]]:
+def run_grasp(instance: GraphInstance, num_iter: int = 5, alpha: float = 0.3) -> List[List[int]]:
     """ Apply Greedy Randomized Search Procedure (GRASP) """
 
     # constructed_solutions = []
