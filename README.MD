@@ -1,4 +1,6 @@
-Usage: `python -m main.py`
+Usage: `python -m main_v1.py` 
+
+(Version 2 is currently work in progress. It is going to be more abstract version but easier to maintain and comes with better readability.)
 
 In main.py the experiment is created, including all **320 instances of the assembly line balancing problem with setups 
 (SUALBSP)**. For each instance ten solutions will be computed, one with each of the eight heuristics and two
