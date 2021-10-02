@@ -24,10 +24,9 @@ def create_instances(quantity: int = 10) -> List[GraphInstance]:
 
 
 def create_heuristics() -> List[Heuristic]:
-    """Creates a list of heuristics of all possible combinations of optimization strategy and ordering rule"""
+    """Creates a list of heuristics. These are all possible combinations of optimization strategy and ordering rule"""
     
-    """With __subclasses__ we can add a new strategies and rules without having to change the code here"""
-    strategies = OptimizationStrategy.__subclasses__()
+    strategies = OptimizationStrategy.__subclasses__() # Using __subclasses__ allows for adding a new strategy or rule without having to change the code here
     orderings  = TaskOrderingRule.__subclasses__()          
     heuristics = [Heuristic(strategy(), ordering()) for strategy in strategies for ordering in orderings]
     
