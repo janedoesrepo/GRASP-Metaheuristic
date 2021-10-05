@@ -1,4 +1,4 @@
-from app_v2.graph import GraphInstance
+from app_v2.graph import Task
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
@@ -15,7 +15,7 @@ class TaskOrderingRule(ABC):
     could be written in a functional adaption of the Strategy Pattern and passed as functions.
     """      
     @abstractmethod
-    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
+    def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
         pass
     
     def __str__(self):
@@ -24,55 +24,59 @@ class TaskOrderingRule(ABC):
     
 class MaxTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time descending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
-        candidate_tasks = setups_plus_processing(candidates, station, instance.setups, instance.processing_times)
+    def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+        candidate_tasks = setups_plus_processing(candidates, station)
         return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
     
     
 class MinTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time ascending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
-        candidate_tasks = setups_plus_processing(candidates, station, instance.setups, instance.processing_times)
+    def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+        candidate_tasks = setups_plus_processing(candidates, station)
         return sorted(candidate_tasks, key=lambda x: x[1])
     
     
 class MaxSOrdering(TaskOrderingRule):
     """Orders tasks by setup time descending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
-        candidate_tasks = setups_only(candidates, station, instance.setups)
+    def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+        candidate_tasks = setups_only(candidates, station)
         return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
     
     
 class MinSOrdering(TaskOrderingRule):
     """Orders tasks by setup time ascending"""
-    def order_tasks(self, candidates: List[int], station: List[int], instance: GraphInstance) -> List[Tuple[int, float]]:
-        candidate_tasks = setups_only(candidates, station, instance.setups)
+    def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+        candidate_tasks = setups_only(candidates, station)
         return sorted(candidate_tasks, key=lambda x: x[1])
         
         
-def setups_plus_processing(cln: List[int], station: List[int], tsu: List[List[int]], t: List[int]) -> List[Tuple[int, float]]:
+def setups_plus_processing(candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+    """TODO: list comprehension"""
     lst = []
-    for task in cln:
-        if station:
+    for task in candidates:
+        if len(station):
             # time between last task assigned to the actual open station and the candidate task
-            value = t[task] + tsu[station[-1]][task]
+            value = task.processing_time + station[-1].setup_times[task.id]
             lst.append((task, value))
-        elif not station:
+        else:
             # mean of all setup times between task an all other tasks
-            value = t[task] + sum(tsu[task]) / (len(tsu[task])-1)
+            value = task.processing_time + sum(task.setup_times) / (len(task.setup_times)-1)
             lst.append((task, value))
+            
     return lst
 
 
-def setups_only(cln: List[int], station: List[int], tsu: List[List[int]]) -> List[Tuple[int, float]]:
+def setups_only(cln: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+    """TODO: list comprehension"""
     lst = []
     for task in cln:
-        if station:
+        if len(station):
             # time between last task assigned to the actual open station and the candidate task
-            value = tsu[station[-1]][task]
+            value = station[-1].setup_times[task.id]
             lst.append((task, value))
-        elif not station:
+        else:
             # mean of all setup times between task an all other tasks
-            value = sum(tsu[task]) / (len(tsu[task])-1)
+            value = sum(task.setup_times) / (len(task.setup_times)-1)
             lst.append((task, value))
+            
     return lst

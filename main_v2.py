@@ -5,8 +5,8 @@ from app_v2.graph import GraphInstance
 from app_v2.methods.grasp import run_grasp
 from app_v2.methods.heuristic import Heuristic
 from app_v2.methods.io import export_results
-from app_v2.methods.rules import MaxTSOrdering, TaskOrderingRule
-from app_v2.methods.strategies import OptimizationStrategy, StationOrientedStrategy
+from app_v2.methods.rules import TaskOrderingRule
+from app_v2.methods.strategies import OptimizationStrategy
 
 
 def create_instances(quantity: int = 10) -> List[GraphInstance]:
@@ -51,31 +51,29 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
 
         # Apply heuristics to instance
         for heuristic in heuristics:
-            
-            print(f"Applying {heuristic}")
-            t1 = perf_counter()
-            
+        
+            t1 = perf_counter() 
             solution = heuristic.apply(instance)
-            
             t2 = perf_counter()
+            
             runtime = t2-t1
             instance.solutions[heuristic] = {'m': len(solution), 'rt': runtime, 'sol': solution}
 
         solutions[instance] = instance.solutions
 
-        print(f"Applying GRASP-5 metaheuristic")
-        t3 = perf_counter()
-        solution = run_grasp(instance)
-        t4 = perf_counter()
-        runtime = t4-t3
-        instance.solutions['GRASP-5'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+        # print(f"Applying GRASP-5 metaheuristic")
+        # t3 = perf_counter()
+        # solution = run_grasp(instance)
+        # t4 = perf_counter()
+        # runtime = t4-t3
+        # instance.solutions['GRASP-5'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
 
-        print(f"Applying GRASP-10 metaheuristic")
-        t5 = perf_counter()
-        solution = run_grasp(instance, num_iter=10)
-        t6 = perf_counter()
-        runtime = t6-t5
-        instance.solutions['GRASP-10'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+        # print(f"Applying GRASP-10 metaheuristic")
+        # t5 = perf_counter()
+        # solution = run_grasp(instance, num_iter=10)
+        # t6 = perf_counter()
+        # runtime = t6-t5
+        # instance.solutions['GRASP-10'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
 
         print(f"Postprocessing")
         best_solution = instance.postprocess()
@@ -105,7 +103,13 @@ if __name__ == "__main__":
     main(1)
     
     if enable_tests:
-        strategy = StationOrientedStrategy()
+        from app_v2.graph import Task
+        from app_v2.methods.rules import MaxTSOrdering
+        from app_v2.methods.strategies import StationOrientedStrategy, TaskOrientedStrategy
+        import random
+        
+        """Test Heuristic Creation"""
+        strategy = TaskOrientedStrategy()
         print(strategy)
         
         ordering = MaxTSOrdering()
@@ -113,4 +117,15 @@ if __name__ == "__main__":
         
         heuristic = Heuristic(strategy, ordering)
         print(heuristic)
+        
+        """Test Task Creation and Removal"""
+        task1 = Task(1, random.randint(0, 10))
+        task2 = Task(2, random.randint(0, 10))
+        
+        # can we remove a task from a list?
+        tasks = [task1, task2]
+        print(tasks)
+        
+        tasks.remove(task1)
+        print(tasks)
 

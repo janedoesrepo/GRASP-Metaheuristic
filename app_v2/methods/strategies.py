@@ -1,15 +1,15 @@
-from copy import deepcopy
-from app_v2.graph import GraphInstance
-from app_v2.methods.rules import TaskOrderingRule
-from .utils import get_candidates, assign_task, compute_station_time
 from abc import ABC, abstractmethod
 from typing import List
+
+from app_v2.graph import GraphInstance, Task
+from app_v2.methods.rules import TaskOrderingRule
+from .utils import find_station_candidates, compute_station_time
 
 
 class OptimizationStrategy:
     """Abstract class that describes the strategy by which the solutions are optimized"""
     @abstractmethod
-    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List:
+    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List[List[Task]]:
         pass
     
     def __str__(self):
@@ -17,80 +17,97 @@ class OptimizationStrategy:
     
 
 class StationOrientedStrategy(OptimizationStrategy):
-    "Implements the station oriented optimization strategy"
-    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List:
+    """Implements the station oriented optimization strategy"""
+    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List[List[Task]]:
 
-        # copies are needed for in order to not change the original lists
-        candidate_list = instance.task_ids.copy()
-        relations = deepcopy(instance.relations)
+        # get a mutable copy of the original task list
+        candidate_list = instance.tasks.copy()
         
-        stations = [[]]
-        curr_station = stations[-1]
+        # initialize stations
+        stations: List[List[Task]] = [[]]
+        current_station = stations[-1]
 
-        while candidate_list:
+        # as long as there are tasks in the candidate list try to assign them
+        while len(candidate_list):
+            
+            # find the candidates for the current station
+            station_candidates = find_station_candidates(candidate_list, current_station, instance.cycle_time)
 
-            # build candidate list for actual open station
-            station_candidates = get_candidates(instance, candidate_list, relations, curr_station)
-
-            # if no task fits in actual open station then open new empty station and build a new candidate list
-            if not station_candidates:
+            # if there are no candidates for the current station open a new empty station
+            if not len(station_candidates):
                 stations.append([])
-                curr_station = stations[-1]
-                station_candidates = get_candidates(instance, candidate_list, relations, curr_station)
+                current_station = stations[-1]
+                continue
 
-            # order candidates
-            station_candidates = ordering_rule.order_tasks(station_candidates, curr_station, instance)
-
-            # assign first task in CL_n to actual open station
-            assign_task(curr_station, station_candidates[0][0], candidate_list, relations)
+            # order the list of station candidates
+            ordered_candidates = ordering_rule.order_tasks(station_candidates, current_station)
+            candidate = ordered_candidates[0][0]
+            
+            # assign the candidate to the current station RCLn and remove it from candidate list CL
+            current_station.append(candidate)
+            candidate_list.remove(candidate)
+            
+            # Remove the candidate as a predecessor from all other candidates
+            for task in candidate_list:
+                if candidate.id in task.predecessors:
+                    task.predecessors.remove(candidate.id)
 
         return stations
         
 
 class TaskOrientedStrategy(OptimizationStrategy):
-    "Implements the task oriented optimization strategy"
-    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List:
+    """Implements the task oriented optimization strategy"""
+    def solve_instance(self, instance: GraphInstance, ordering_rule: TaskOrderingRule) -> List[List[Task]]:
 
-        # copies are needed for in order to not change the original lists
-        candidate_list = instance.task_ids.copy()
-        relations = deepcopy(instance.relations)
+        # get a mutable copy of the original task list
+        candidate_list = instance.tasks.copy()
         
-        stations = [[]]
-        curr_station = stations[-1]
+        # initialize stations
+        stations: List[List[Task]] = [[]]
+        current_station = stations[-1]
 
+        # as long as there are tasks in the candidate list try to assign them
         while candidate_list:
 
-            # build CL_n for TH depending only on precedence relations
-            station_candidates = []
-            for task in candidate_list:
-                # proceed only if all predecessors have been assigned
-                if not relations[task]:
-                    station_candidates.append(task)
+            # find the candidates (tasks that have no precedence relations) for the current station
+            station_candidates = [task for task in candidate_list if not task.has_predecessors()]
 
             # order candidate tasks
-            station_candidates = ordering_rule.order_tasks(station_candidates, curr_station, instance)
-
-            # assign first task in CL_n to first station it fits in
-            temp_rel = relations[station_candidates[0][0]][:]
+            ordered_candidates = ordering_rule.order_tasks(station_candidates, current_station)
+            candidate = ordered_candidates[0][0]
+            
+            # assign first task in CL_n to first station it fits in       
             for station in stations:
-                # delete all tasks of actual station from precedence relations
-                for task in station:
-                    if task in temp_rel:
-                        temp_rel.remove(task)
-
-                # as soon as precedence relations of task are met, do station assignment
-                if not temp_rel:
-                    temp_station = station.copy()
-                    temp_station.append(station_candidates[0][0])
-                    if compute_station_time(temp_station, instance.processing_times,
-                                            instance.setups) <= instance.cycle_time:
-                        # if task fits in station, assign task and break for-loop
-                        assign_task(station, station_candidates[0][0], candidate_list, relations)
-                        break
+                
+                # if task does not fit in station, check the next station
+                station_time = compute_station_time(station + [candidate])
+                if station_time >= instance.cycle_time:
+                    continue
+                
+                # else assign candidate task in CL_n to current station RCLn and remove it from candidate list CL
+                current_station.append(candidate)
+                candidate_list.remove(candidate)
+                
+                # Remove this task as a predecessor from all other candidates
+                for task in candidate_list:
+                    if candidate.id in task.predecessors:
+                        task.predecessors.remove(candidate.id)
+                
+                # the candidate was assigned. No need to check other stations
+                break
             else:
-                # in case for-loop did not break the task did not fit in any open station
+                # in case for-loop did not encounter a break-statement, else is invoked.
+                # the candidate did not fit in any open station -> open a new station
                 stations.append([])  # open new station
-                curr_station = stations[-1]
-                assign_task(curr_station, station_candidates[0][0], candidate_list, relations)
+                current_station = stations[-1]
+                
+                # assign first task in CL_n to current station RCLn and remove it from candidate list CL
+                current_station.append(candidate)
+                candidate_list.remove(candidate)
+                
+                # Remove this task as a predecessor from all other candidates
+                for task in candidate_list:
+                    if candidate.id in task.predecessors:
+                        task.predecessors.remove(candidate.id)
 
         return stations

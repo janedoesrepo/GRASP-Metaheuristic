@@ -1,6 +1,6 @@
 from copy import deepcopy
 import numpy as np
-from .utils import get_candidates
+from .utils import find_station_candidates
 from .local_search import improve_solution
 from app_v2.graph import GraphInstance
 from typing import List
@@ -12,7 +12,7 @@ def get_greedy_index(station_candidates: List[int], curr_station: List[int], pro
     greedy = []
     for candidate in station_candidates:
 
-        if not curr_station:
+        if not len(curr_station):
             total_time = processing_times[candidate]
         else:
             predecessor = curr_station[-1]
@@ -37,10 +37,10 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[List[int]]
     while candidate_list:
 
         # try to find candidates for the current station
-        station_candidates = get_candidates(instance, candidate_list, relations, curr_station)
+        station_candidates = find_station_candidates(instance, candidate_list, relations, curr_station)
 
         # if no candidates are found, we open a new station
-        if not station_candidates:
+        if not len(station_candidates):
             stations.append([])
             curr_station = stations[-1]
             continue

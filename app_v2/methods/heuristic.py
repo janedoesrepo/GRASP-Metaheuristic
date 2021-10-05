@@ -1,4 +1,6 @@
-from app_v2.graph import GraphInstance
+from typing import List
+
+from app_v2.graph import GraphInstance, Task
 from app_v2.methods.rules import TaskOrderingRule
 from app_v2.methods.strategies import OptimizationStrategy
 
@@ -32,6 +34,7 @@ class Heuristic:
     def __str__(self):
         return f"{self.strategy}_{self.ordering_rule}"
 
-    def apply(self, instance: GraphInstance):
+    def apply(self, instance: GraphInstance) -> List[List[Task]]:
+        print(f"Applying {self}")
         stations = self.strategy.solve_instance(instance, self.ordering_rule)
         return stations

@@ -17,6 +17,9 @@ class Task:
     processing_time: int
     predecessors: List[int] = field(default_factory=list, init=False)
     setup_times: List[int] = field(default_factory=list, init=False)
+    
+    def has_predecessors(self) -> bool:
+        return len(self.predecessors)
 
 
 class GraphInstance:
@@ -56,42 +59,20 @@ class GraphInstance:
             num_relations = int(file.readline())
             self.cycle_time = int(file.readline())                
             
-            # create task ids
-            self.task_ids = list(range(num_tasks))
-            
-            # # Create tasks with id and processing times
-            # for _ in range(num_tasks):
-            #     task_id, time = file.readline().split(',')
-            #     self.tasks.append(Task(task_id, time))
-                
-            # read processing times
-            self.processing_times = []
+            # Create tasks with id and processing times
             for _ in range(num_tasks):
-                _, time = file.readline().split(',')
-                self.processing_times.append(int(time))
+                task_id, time = file.readline().split(',')
+                self.tasks.append(Task(int(task_id), int(time)))
                 
-            # # Add predecessor ids to each task        
-            # for _ in range(num_relations):
-            #     predecessor, task_id = file.readline().split(',')
-            #     self.tasks[int(task_id)].predecessors.append(predecessor)
-                
-            # read precedence relations
-            self.relations = [[] for _ in range(num_tasks)]
+            # Add the ids of its predecessor to each task        
             for _ in range(num_relations):
-                a, b = file.readline().split(',')
-                self.relations[int(b)].append(int(a))
+                predecessor, task_id = file.readline().split(',')
+                self.tasks[int(task_id)].predecessors.append(int(predecessor))
             
-            # # Setup times is a matrice of dim num_tasks x num_tasks
-            # for i in range(num_tasks):
-            #     setup_times_i = file.readline().split(',')
-            #     self.tasks[i].setup_times = list(map(int, setup_times_i))
-                
-            # read setup times
-            self.setups = []
-            for _ in range(num_tasks):
-                line = file.readline().split(',')
-                line = list(map(int, line))
-                self.setups.append(line)  
+            # Setup times is a matrice of dim num_tasks x num_tasks
+            for i in range(num_tasks):
+                setup_times_i = file.readline().split(',')
+                self.tasks[i].setup_times = list(map(int, setup_times_i))
                 
             print(f"*Import of {self} successful!*")
 
