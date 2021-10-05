@@ -25,10 +25,12 @@ class Heuristic:
       - TH-MaxTS, TH-MaxS, TH-MinTS, TH-MinS.
      """
 
-    def __init__(self, strategy: OptimizationStrategy, rule: TaskOrderingRule):
+    def __init__(self, strategy: OptimizationStrategy, ordering_rule: TaskOrderingRule):
         self.strategy = strategy
-        self.ordering_rule = rule
-        self.name = f"{strategy}_{rule}"
+        self.ordering_rule = ordering_rule
+        
+    def __str__(self):
+        return f"{self.strategy}_{self.ordering_rule}"
 
     def apply(self, instance: GraphInstance):
         stations = self.strategy.solve_instance(instance, self.ordering_rule)

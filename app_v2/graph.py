@@ -22,30 +22,32 @@ class Task:
 class GraphInstance:
 
     def __init__(self, graph, variant, ident):
-        """TODO: this is never used. Probably filename is enough"""
+
         self.graph = graph
         self.variant = variant
+        self.ident = ident
         
-        self.name = f"{graph}_{variant}_EJ{ident}"
-        self.filename = f"{self.name}.txt"
+        self.filename = f"{self}.txt"
 
         self.tasks: List[Task] = []
         
         """TODO: Move this outside of here"""
         self.solutions = {}
+        
+    def __str__(self):
+        return f"{self.graph}_{self.variant}_EJ{self.ident}"
 
-
-    def load(self):
+    def parse_instance(self):
         """ Import-function for the data set of Martino and Pastor (2010)
-                The data is available at https://www.assembly-line-balancing.de/sualbsp
+            The data is available at https://www.assembly-line-balancing.de/sualbsp
 
-                line 1:                     n; number of tasks
-                line 2:                     p; number of direct precedence relations
-                line 3:                     c; cycle time
-                lines 4 to 4+n-1:           cl, t; id task, processing time
-                lines 4+n to 4+n+p-1:       relations; direct precedence relations in form i,j
-                lines 4+n+p to 4+2n+p-1:    tsu; setup times
-            """
+            line 1:                     n; number of tasks
+            line 2:                     p; number of direct precedence relations
+            line 3:                     c; cycle time
+            lines 4 to 4+n-1:           cl, t; id task, processing time
+            lines 4+n to 4+n+p-1:       relations; direct precedence relations in form i,j
+            lines 4+n+p to 4+2n+p-1:    tsu; setup times
+        """
 
         with open("data/Instances/" + self.filename, "r") as file:
 
@@ -91,7 +93,7 @@ class GraphInstance:
                 line = list(map(int, line))
                 self.setups.append(line)  
                 
-            print(f"*Import of {self.name} successful!*")
+            print(f"*Import of {self} successful!*")
 
     
     def postprocess(self):
@@ -102,7 +104,7 @@ class GraphInstance:
         for _, solution in self.solutions.items():
             solution['ARD'] = compute_ARD(solution, best_solution)
 
-        print(f"Writing results to {self.name}.csv")
+        print(f"Writing results to {self}.csv")
 
         # Set result dir and create it, if it does not exist
         result_dir = pathlib.Path(f"app_v2/results/{self.graph}/")
@@ -110,8 +112,8 @@ class GraphInstance:
 
         # Write result to file
         data = [
-            [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
+            [self, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
             for heuristic_name, solution in self.solutions.items()]
         df = pd.DataFrame(data, columns=["Instance", "Heuristic", "Number of Stations", "Best Solution", "ARD", "Runtime"])
-        df.to_csv(result_dir/f"{self.name}.csv", sep=';', index=False)
+        df.to_csv(result_dir/f"{self}.csv", sep=';', index=False)
         return best_solution
