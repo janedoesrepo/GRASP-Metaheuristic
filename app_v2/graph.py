@@ -1,5 +1,6 @@
 import pandas as pd
 import pathlib
+import copy
 from dataclasses import dataclass, field
 from typing import List
 
@@ -20,6 +21,19 @@ class Task:
     
     def has_predecessors(self) -> bool:
         return len(self.predecessors)
+    
+    def __deepcopy__(self, memo):
+        
+        id_self = id(self)
+        
+        _copy = memo.get(id_self)
+        if _copy is None:
+            _copy = type(self)(
+                copy.deepcopy(self.id, memo),
+                copy.deepcopy(self.processing_time, memo))
+            _copy.predecessors = self.predecessors.copy()
+            _copy.setup_times = self.setup_times
+        return _copy
 
 
 class GraphInstance:

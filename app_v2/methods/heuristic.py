@@ -1,4 +1,5 @@
 from typing import List
+import copy
 
 from app_v2.graph import GraphInstance, Task
 from app_v2.methods.rules import TaskOrderingRule
@@ -33,8 +34,16 @@ class Heuristic:
         
     def __str__(self):
         return f"{self.strategy}_{self.ordering_rule}"
+    
 
-    def apply(self, instance: GraphInstance) -> List[List[Task]]:
+    def solve_instance(self, instance: GraphInstance) -> List[List[Task]]:
+        
         print(f"Applying {self}")
-        stations = self.strategy.solve_instance(instance, self.ordering_rule)
+        
+        # get a mutable copy of the original task list
+        candidate_list = copy.deepcopy(instance.tasks)
+        
+        # assign all tasks in candidate list to stations
+        stations = self.strategy.assign_tasks(candidate_list, self.ordering_rule, instance.cycle_time)
+        
         return stations

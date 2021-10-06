@@ -1,6 +1,7 @@
 from app_v2.graph import Task
 from abc import ABC, abstractmethod
 from typing import List, Tuple
+import statistics
 
 
 class TaskOrderingRule(ABC):
@@ -60,7 +61,7 @@ def setups_plus_processing(candidates: List[Task], station: List[Task]) -> List[
             lst.append((task, value))
         else:
             # mean of all setup times between task an all other tasks
-            value = task.processing_time + sum(task.setup_times) / (len(task.setup_times)-1)
+            value = task.processing_time + statistics.mean(task.setup_times)
             lst.append((task, value))
             
     return lst
@@ -76,7 +77,7 @@ def setups_only(cln: List[Task], station: List[Task]) -> List[Tuple[Task, float]
             lst.append((task, value))
         else:
             # mean of all setup times between task an all other tasks
-            value = sum(task.setup_times) / (len(task.setup_times)-1)
+            value = statistics.mean(task.setup_times)
             lst.append((task, value))
             
     return lst

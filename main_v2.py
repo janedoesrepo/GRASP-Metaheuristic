@@ -46,18 +46,19 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
 
         t0 = perf_counter()
         
-        # Load the data from the instance txt-file
+        # Load the data from the instance's .txt-file
         instance.parse_instance()
 
         # Apply heuristics to instance
         for heuristic in heuristics:
         
             t1 = perf_counter() 
-            solution = heuristic.apply(instance)
+            solution = heuristic.solve_instance(instance)
             t2 = perf_counter()
             
             runtime = t2-t1
             instance.solutions[heuristic] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+            print(f"Solution: {len(solution)}")
 
         solutions[instance] = instance.solutions
 
@@ -104,28 +105,58 @@ if __name__ == "__main__":
     
     if enable_tests:
         from app_v2.graph import Task
-        from app_v2.methods.rules import MaxTSOrdering
+        from app_v2.methods.rules import MaxTSOrdering, MinTSOrdering
         from app_v2.methods.strategies import StationOrientedStrategy, TaskOrientedStrategy
         import random
+        import copy
         
         """Test Heuristic Creation"""
-        strategy = TaskOrientedStrategy()
+        strategy = StationOrientedStrategy()
         print(strategy)
         
-        ordering = MaxTSOrdering()
+        ordering = MinTSOrdering()
         print(ordering)
         
         heuristic = Heuristic(strategy, ordering)
         print(heuristic)
         
+        SH_maxTSHeuristic = Heuristic(StationOrientedStrategy(), MaxTSOrdering())
+        
+        """Test Instance Creation"""
+        instance = GraphInstance("MITCHELL.IN2", "TS0.25", 1)
+        instance.parse_instance()
+        
+        # """Solve an instance"""
+        # solution1 = SH_maxTSHeuristic.solve_instance(instance)
+        # print(len(solution1) )
+        # solution2 = heuristic.solve_instance(instance)
+        # print(len(solution2))
+        
         """Test Task Creation and Removal"""
         task1 = Task(1, random.randint(0, 10))
+        task1.predecessors = [0,3,4]
         task2 = Task(2, random.randint(0, 10))
+        task2.predecessors = [1,3,4]
         
         # can we remove a task from a list?
+        print("Remove task1 from list")
         tasks = [task1, task2]
         print(tasks)
         
         tasks.remove(task1)
         print(tasks)
+        
+        # can we deepcopy tasks?
+        print("Make a deepcopy of task2 and remove predecessor 1")
+        task2_copy = copy.deepcopy(task2)
+        task2_copy.predecessors.remove(1) 
+        print(task2)
+        print(task2_copy)
+        
+        print("Deepcopy a list of tasks and remove predecessor 3 from the first task")
+        tasks.append(task1)
+        tasks_copy = copy.deepcopy(tasks)
+        tasks_copy[0].predecessors.remove(3)
+        print(tasks)
+        print(tasks_copy)
 
