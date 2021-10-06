@@ -15,8 +15,8 @@ def compute_ARD(solution, best_solution) -> float:
 class Task:
     id: int
     processing_time: int
-    predecessors: List[int] = field(default_factory=list, init=False)
-    setup_times: List[int] = field(default_factory=list, init=False)
+    predecessors: List[int] = field(default_factory=list, init=False, repr=False)
+    setup_times: List[int] = field(default_factory=list, init=False, repr=False)
     
     def has_predecessors(self) -> bool:
         return len(self.predecessors)

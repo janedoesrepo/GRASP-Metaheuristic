@@ -26,58 +26,59 @@ class TaskOrderingRule(ABC):
 class MaxTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time descending"""
     def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
-        candidate_tasks = setups_plus_processing(candidates, station)
-        return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
+        
+        # calculate the processing times of each task if added to the station
+        tasks_with_values = setups_plus_processing(candidates, station)
+        
+        return sorted(tasks_with_values, key=lambda task_value: task_value[1], reverse=True)
     
     
 class MinTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time ascending"""
     def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
-        candidate_tasks = setups_plus_processing(candidates, station)
-        return sorted(candidate_tasks, key=lambda x: x[1])
+        
+        # calculate the processing times of each task if added to the station
+        tasks_with_values = setups_plus_processing(candidates, station)
+        
+        return sorted(tasks_with_values, key=lambda task_value: task_value[1])
     
     
 class MaxSOrdering(TaskOrderingRule):
     """Orders tasks by setup time descending"""
     def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
-        candidate_tasks = setups_only(candidates, station)
-        return sorted(candidate_tasks, key=lambda x: x[1], reverse=True)
+        
+        # calculate the setup times of each task if added to the station
+        tasks_with_values = setups_only(candidates, station)
+        
+        return sorted(tasks_with_values, key=lambda task_value: task_value[1], reverse=True)
     
     
 class MinSOrdering(TaskOrderingRule):
     """Orders tasks by setup time ascending"""
     def order_tasks(self, candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
-        candidate_tasks = setups_only(candidates, station)
-        return sorted(candidate_tasks, key=lambda x: x[1])
+        
+        # calculate the setup times of each task if added to the station
+        tasks_with_values = setups_only(candidates, station)
+        
+        return sorted(tasks_with_values, key=lambda task_value: task_value[1])
         
         
 def setups_plus_processing(candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
-    """TODO: list comprehension"""
-    lst = []
-    for task in candidates:
-        if len(station):
-            # time between last task assigned to the actual open station and the candidate task
-            value = task.processing_time + station[-1].setup_times[task.id]
-            lst.append((task, value))
-        else:
-            # mean of all setup times between task an all other tasks
-            value = task.processing_time + statistics.mean(task.setup_times)
-            lst.append((task, value))
-            
-    return lst
+    
+    # calculate processing time plus...
+    if len(station):
+        # ... the setup time between last task assigned to the current station and the candidate task
+        return [(task, task.processing_time + station[-1].setup_times[task.id]) for task in candidates]
+    else:
+        # ... the mean of all setup times between the candidate task an all other tasks
+        return [(task, task.processing_time + statistics.mean(task.setup_times)) for task in candidates]
 
 
-def setups_only(cln: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
-    """TODO: list comprehension"""
-    lst = []
-    for task in cln:
-        if len(station):
-            # time between last task assigned to the actual open station and the candidate task
-            value = station[-1].setup_times[task.id]
-            lst.append((task, value))
-        else:
-            # mean of all setup times between task an all other tasks
-            value = statistics.mean(task.setup_times)
-            lst.append((task, value))
-            
-    return lst
+def setups_only(candidates: List[Task], station: List[Task]) -> List[Tuple[Task, float]]:
+    
+    if len(station):
+        # only the setup time between last task assigned to the current station and the candidate task
+        return [(task, station[-1].setup_times[task.id]) for task in candidates]
+    else:
+        # only the mean of all setup times between the candidate task an all other tasks
+        return [(task, statistics.mean(task.setup_times)) for task in candidates]
