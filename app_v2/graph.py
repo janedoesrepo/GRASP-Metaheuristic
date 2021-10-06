@@ -13,7 +13,6 @@ def compute_ARD(solution, best_solution) -> float:
 
 @dataclass()
 class Task:
-    """Implement this at the end. There are other low hanging fruits"""
     id: int
     processing_time: int
     predecessors: List[int] = field(default_factory=list, init=False)

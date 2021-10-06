@@ -26,11 +26,14 @@ class StationOrientedStrategy(OptimizationStrategy):
         stations: List[List[Task]] = [[]]
         current_station = stations[-1]
 
-        # as long as there are tasks in the candidate list try to assign them
+        # For a solution all tasks need to be assigned to station
         while len(candidate_list):
             
-            # find the candidates for the current station
-            station_candidates = find_station_candidates(candidate_list, current_station, cycle_time)            
+            # Condition 1: tasks have no precedence relations
+            station_candidates = [task for task in candidate_list if not task.has_predecessors()]
+            
+            # Condition 2: tasks fit into the current station
+            station_candidates = [task for task in station_candidates if compute_station_time(current_station + [task]) <= cycle_time]                    
 
             # if there are no candidates for the current station open a new empty station
             if not len(station_candidates):
@@ -40,16 +43,18 @@ class StationOrientedStrategy(OptimizationStrategy):
 
             # order the list of station candidates
             ordered_candidates = ordering_rule.order_tasks(station_candidates, current_station)
-            candidate = ordered_candidates[0][0]
             
-            # assign the candidate to the current station RCLn and remove it from candidate list CL
-            current_station.append(candidate)
-            candidate_list.remove(candidate)
+            # next task to be sequenced is first in the ordered list of candidates
+            next_task = ordered_candidates[0][0]
+            
+            # assign the task to the current station RCLn and remove it from candidate list CL
+            current_station.append(next_task)
+            candidate_list.remove(next_task)
             
             # Remove the candidate as a predecessor from all other candidates
             for task in candidate_list:
-                if candidate.id in task.predecessors:
-                    task.predecessors.remove(candidate.id)
+                if next_task.id in task.predecessors:
+                    task.predecessors.remove(next_task.id)
 
         return stations
         

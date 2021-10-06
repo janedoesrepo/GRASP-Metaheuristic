@@ -58,7 +58,7 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
             
             runtime = t2-t1
             instance.solutions[heuristic] = {'m': len(solution), 'rt': runtime, 'sol': solution}
-            print(f"Solution: {len(solution)}")
+            print(f"Number of stations: {len(solution)}")
 
         solutions[instance] = instance.solutions
 
@@ -101,7 +101,7 @@ def main(num_instances: int):
 
 if __name__ == "__main__":
     enable_tests=False
-    main(1)
+    main(10)
     
     if enable_tests:
         from app_v2.graph import Task
