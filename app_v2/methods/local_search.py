@@ -1,4 +1,4 @@
-from app_v2.graph import GraphInstance
+from app_v2.graph import GraphInstance, Task
 import numpy as np
 from .utils import compute_station_time
 from typing import List
@@ -43,7 +43,7 @@ def var_imbalanced(x, y):
     return y-x
 
 
-def improve_solution(solution: List[List[int]], instance: GraphInstance, prob_threshold: float = 0.75) -> List[List[int]]:
+def improve_solution(solution: List[List[Task]], instance: GraphInstance, probability_threshold: float = 0.75) -> List[List[Task]]:
 
     pi = np.concatenate(solution)   # a flattened version of the solution
     num_tasks = len(pi)
@@ -57,7 +57,7 @@ def improve_solution(solution: List[List[int]], instance: GraphInstance, prob_th
         feasible_exchanges = {}
 
         # choose balanced workload objective function with probability threshold
-        if np.random.random() <= prob_threshold:
+        if np.random.random() <= probability_threshold:
             f = f_balanced
             var = var_balanced
         else:

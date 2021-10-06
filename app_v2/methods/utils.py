@@ -31,18 +31,3 @@ def compute_station_time(station: List[Task]) -> int:
             station_time += task.processing_time + predecessor.setup_times[task.id]
                 
     return station_time
-
-
-def find_station_candidates(candidate_list: List[Task], station: List[Task], cycle_time: int) -> List[Task]:
-    """Check if any task in the candidate list fulfills all precedence relations and fits in actual open station"""
-
-    # Get the tasks that have no precedence relations
-    station_candidates = [task for task in candidate_list if not task.has_predecessors()]
-    
-    # Remove tasks that do not fit in the current station
-    for task in station_candidates:
-        station_time = compute_station_time(station + [task])
-        if station_time >= cycle_time:
-            station_candidates.remove(task)
-
-    return station_candidates

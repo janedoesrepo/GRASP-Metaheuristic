@@ -58,16 +58,18 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
             
             runtime = t2-t1
             instance.solutions[heuristic] = {'m': len(solution), 'rt': runtime, 'sol': solution}
-            print(f"Number of stations: {len(solution)}")
+            #print(f"Number of stations: {len(solution)}")
 
         solutions[instance] = instance.solutions
 
-        # print(f"Applying GRASP-5 metaheuristic")
-        # t3 = perf_counter()
-        # solution = run_grasp(instance)
-        # t4 = perf_counter()
-        # runtime = t4-t3
-        # instance.solutions['GRASP-5'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
+        print(f"Applying GRASP-5 metaheuristic")
+        
+        t3 = perf_counter()
+        solution = run_grasp(instance)
+        t4 = perf_counter()
+        
+        runtime = t4-t3
+        instance.solutions['GRASP-5'] = {'m': len(solution), 'rt': runtime, 'sol': solution}
 
         # print(f"Applying GRASP-10 metaheuristic")
         # t5 = perf_counter()

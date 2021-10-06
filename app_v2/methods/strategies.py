@@ -3,7 +3,7 @@ from typing import List
 
 from app_v2.graph import GraphInstance, Task
 from app_v2.methods.rules import TaskOrderingRule
-from .utils import find_station_candidates, compute_station_time
+from .utils import compute_station_time
 
 
 class OptimizationStrategy:
