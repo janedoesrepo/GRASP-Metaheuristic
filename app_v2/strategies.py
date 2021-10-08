@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from app_v2.graph import Task
-from app_v2.methods.rules import TaskOrderingRule
+from app_v2.rules import TaskOrderingRule
 from .utils import compute_station_time
 
 

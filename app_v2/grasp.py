@@ -1,6 +1,6 @@
 import copy
 import random
-from app_v2.methods.utils import compute_station_time
+from app_v2.utils import compute_station_time
 from .local_search import improve_solution
 from app_v2.graph import GraphInstance, Task
 from typing import List

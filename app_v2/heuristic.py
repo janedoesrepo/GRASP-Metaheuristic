@@ -2,8 +2,8 @@ from typing import List
 import copy
 
 from app_v2.graph import GraphInstance, Task
-from app_v2.methods.rules import TaskOrderingRule
-from app_v2.methods.strategies import OptimizationStrategy
+from app_v2.rules import TaskOrderingRule
+from app_v2.strategies import OptimizationStrategy
 
 
 class Heuristic:

@@ -89,6 +89,7 @@ class GraphInstance:
             print(f"*Import of {self} successful!*")
 
     def postprocess(self):
+        
         # find best solution BS
         best_solution = min([solution["m"] for _, solution in self.solutions.items()])
 
@@ -126,4 +127,5 @@ class GraphInstance:
             ],
         )
         df.to_csv(result_dir / f"{self}.csv", sep=";", index=False)
+        
         return best_solution
