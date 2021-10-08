@@ -83,7 +83,7 @@ class Instance:
         print(f"Writing results to {self.name}.csv")
 
         result_dir = Path(f"app_v1/results/{self.graph}/")
-        result_dir.mkdir(exist_ok=True)
+        result_dir.mkdir(parents=True, exist_ok=True)
 
         data = [
             [self.name, heuristic_name, solution["m"], best_solution, solution["ARD"], solution["rt"]]
