@@ -1,35 +1,33 @@
 import copy
 import random
-from app_v2.utils import compute_station_time
+from app_v2.station import Station
 from .local_search import improve_solution
 from app_v2.graph import GraphInstance, Task
 from typing import List
 
 
-def calculate_greedy_index(
-    candidate_tasks: List[Task], current_station: List[Task]
-) -> List[float]:
+def calculate_greedy_index(candidate_tasks: List[Task], current_station: Station) -> List[float]:
     """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
 
-    if not len(current_station):
+    if current_station.is_empty():
         return [1 / task.processing_time for task in candidate_tasks]
     else:
-        last_task = current_station[-1]
+        last_task = current_station.last()
         return [
             1 / (task.processing_time + last_task.setup_times[task.id])
             for task in candidate_tasks
         ]
 
 
-def construct_solution(instance: GraphInstance, alpha: float) -> List[List[int]]:
+def construct_solution(instance: GraphInstance, alpha: float) -> List[Station]:
 
     # get a mutable copy of the original task list
     candidate_list = copy.deepcopy(instance.tasks)
 
     # Initialise solution with one empty station
-    stations = [[]]
-    current_station = stations[-1]
-
+    current_station = Station()
+    stations = [current_station]
+    
     while len(candidate_list):
 
         # Condition 1: candidates are tasks that have no precedence relations
@@ -41,12 +39,12 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[List[int]]
         candidate_tasks = [
             task
             for task in candidate_tasks
-            if compute_station_time(current_station + [task]) <= instance.cycle_time
+            if current_station.fits_task(task, instance.cycle_time)
         ]
 
         # if there are no candidates for the current station open a new empty station
         if not len(candidate_tasks):
-            stations.append([])
+            stations.append(Station())
             current_station = stations[-1]
             continue
 
@@ -69,7 +67,7 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[List[int]]
         chosen_task = random.choice(restricted_candidates)
 
         # assign the chosen task to the current station and remove it from candidate list
-        current_station.append(chosen_task)
+        current_station.add_task(chosen_task)
         candidate_list.remove(chosen_task)
 
         # Remove the chosen task as a predecessor from all other candidates
@@ -80,9 +78,7 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[List[int]]
     return stations
 
 
-def run_grasp(
-    instance: GraphInstance, num_iter: int = 5, alpha: float = 0.3
-) -> List[List[int]]:
+def run_grasp(instance: GraphInstance, num_iter: int = 5, alpha: float = 0.3) -> List[Station]:
     """Apply Greedy Randomized Search Procedure (GRASP)"""
 
     for iteration in range(1, num_iter + 1):

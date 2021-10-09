@@ -3,7 +3,7 @@ from typing import List
 
 from app_v2.graph import Task
 from app_v2.rules import TaskOrderingRule
-from .utils import compute_station_time
+from app_v2.station import Station
 
 
 class OptimizationStrategy(ABC):
@@ -15,7 +15,7 @@ class OptimizationStrategy(ABC):
         candidate_list: List[Task],
         ordering_rule: TaskOrderingRule,
         cycle_time: int,
-    ) -> List[List[Task]]:
+    ) -> List[Station]:
         pass
 
     def __str__(self):
@@ -31,10 +31,10 @@ class StationOrientedStrategy(OptimizationStrategy):
         candidate_list: List[Task],
         ordering_rule: TaskOrderingRule,
         cycle_time: int,
-    ) -> List[List[Task]]:
+    ) -> List[Station]:
 
         # initialize stations
-        stations: List[List[Task]] = [[]]
+        stations: List[Station] = [Station()]
         current_station = stations[-1]
 
         # For a solution all tasks need to be assigned to station
@@ -49,12 +49,12 @@ class StationOrientedStrategy(OptimizationStrategy):
             candidate_tasks = [
                 task
                 for task in candidate_tasks
-                if compute_station_time(current_station + [task]) <= cycle_time
+                if current_station.fits_task(task, cycle_time)
             ]
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidate_tasks):
-                stations.append([])
+                stations.append(Station())
                 current_station = stations[-1]
                 continue
 
@@ -67,7 +67,7 @@ class StationOrientedStrategy(OptimizationStrategy):
             chosen_task = ordered_candidate_value_list[0][0]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.append(chosen_task)
+            current_station.add_task(chosen_task)
             candidate_list.remove(chosen_task)
 
             # Remove the chosen task as a predecessor from all other candidates
@@ -95,10 +95,10 @@ class TaskOrientedStrategy(OptimizationStrategy):
         candidate_list: List[Task],
         ordering_rule: TaskOrderingRule,
         cycle_time: int,
-    ) -> List[List[Task]]:
+    ) -> List[Station]:
 
         # initialize stations
-        stations: List[List[Task]] = [[]]
+        stations: List[Station] = [Station()]
         current_station = stations[-1]
 
         while len(candidate_list):
@@ -119,10 +119,8 @@ class TaskOrientedStrategy(OptimizationStrategy):
             # assign chosen task to first station it fits in
             for station in stations:
 
-                station_time = compute_station_time(station + [chosen_task])
-
                 # if task does not fit in station, check the next station
-                if station_time > cycle_time:
+                if not station.fits_task(chosen_task, cycle_time):
                     continue
 
                 # else no need to check further stations
@@ -131,11 +129,11 @@ class TaskOrientedStrategy(OptimizationStrategy):
             else:
                 # in case for-loop did not encounter a break-statement, else is invoked.
                 # the chosen task did not fit in any open station -> open a new station
-                stations.append([])  # open new station
+                stations.append(Station())  # open new station
                 current_station = stations[-1]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.append(chosen_task)
+            current_station.add_task(chosen_task)
             candidate_list.remove(chosen_task)
 
             # Remove the chosen task as a predecessor from all other candidates

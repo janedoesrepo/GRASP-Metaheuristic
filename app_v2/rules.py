@@ -3,6 +3,8 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 import statistics
 
+from app_v2.station import Station
+
 
 class TaskOrderingRule(ABC):
     """Abstract class that decsribes a rule by which a list of tasks should be ordered.
@@ -18,8 +20,7 @@ class TaskOrderingRule(ABC):
 
     @abstractmethod
     def order_tasks(
-        self, candidates: List[Task], station: List[Task]
-    ) -> List[Tuple[Task, float]]:
+        self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
         pass
 
     def __str__(self):
@@ -30,8 +31,7 @@ class MaxTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time descending"""
 
     def order_tasks(
-        self, candidates: List[Task], station: List[Task]
-    ) -> List[Tuple[Task, float]]:
+        self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
 
         # calculate the processing times of each task if added to the station
         tasks_with_values = setups_plus_processing(candidates, station)
@@ -45,8 +45,7 @@ class MinTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time ascending"""
 
     def order_tasks(
-        self, candidates: List[Task], station: List[Task]
-    ) -> List[Tuple[Task, float]]:
+        self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
 
         # calculate the processing times of each task if added to the station
         tasks_with_values = setups_plus_processing(candidates, station)
@@ -58,8 +57,7 @@ class MaxSOrdering(TaskOrderingRule):
     """Orders tasks by setup time descending"""
 
     def order_tasks(
-        self, candidates: List[Task], station: List[Task]
-    ) -> List[Tuple[Task, float]]:
+        self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
 
         # calculate the setup times of each task if added to the station
         tasks_with_values = setups_only(candidates, station)
@@ -73,8 +71,7 @@ class MinSOrdering(TaskOrderingRule):
     """Orders tasks by setup time ascending"""
 
     def order_tasks(
-        self, candidates: List[Task], station: List[Task]
-    ) -> List[Tuple[Task, float]]:
+        self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
 
         # calculate the setup times of each task if added to the station
         tasks_with_values = setups_only(candidates, station)
@@ -83,14 +80,13 @@ class MinSOrdering(TaskOrderingRule):
 
 
 def setups_plus_processing(
-    candidates: List[Task], station: List[Task]
-) -> List[Tuple[Task, float]]:
+    candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
 
     # calculate processing time plus...
-    if len(station):
+    if not station.is_empty():
         # ... the setup time between last task assigned to the current station and the candidate task
         return [
-            (task, task.processing_time + station[-1].setup_times[task.id])
+            (task, task.processing_time + station.last().setup_times[task.id])
             for task in candidates
         ]
     else:
@@ -102,12 +98,11 @@ def setups_plus_processing(
 
 
 def setups_only(
-    candidates: List[Task], station: List[Task]
-) -> List[Tuple[Task, float]]:
+    candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
 
-    if len(station):
+    if not station.is_empty():
         # only the setup time between last task assigned to the current station and the candidate task
-        return [(task, station[-1].setup_times[task.id]) for task in candidates]
+        return [(task, station.last().setup_times[task.id]) for task in candidates]
     else:
         # only the mean of all setup times between the candidate task an all other tasks
         return [(task, statistics.mean(task.setup_times)) for task in candidates]

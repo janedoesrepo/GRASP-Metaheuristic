@@ -1,43 +1,44 @@
 from app_v2.graph import GraphInstance, Task
 import random
-from .utils import compute_station_time
+
+from app_v2.station import Station
 from typing import List
 
 
-def reassemble(sequence: List[Task], cycle_time: int) -> List[List[Task]]:
+def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
     """Reassemble a list of tasks into a list of stations. A sequence is reassembled
     by assigning its tasks one by one to a station as long as the station does not
     exceed the cycle time. Once it does, open a new station and continue assigning."""
 
     # print(f"Reassembling sequence: {sequence}")
-    solution: List[List[Task]] = [[]]
-    current_Station = solution[-1]
+    solution: List[Station] = [Station()]
+    current_station = solution[-1]
 
     for task in sequence:
-        if compute_station_time(current_Station + [task]) <= cycle_time:
-            current_Station.append(task)
+        if current_station.fits_task(task, cycle_time):
+            current_station.add_task(task)
         else:
-            solution.append([task])
-            current_Station = solution[-1]
+            solution.append(Station([task]))
+            current_station = solution[-1]
 
     return solution
 
 
-def balanced_objective(solution: List[List[Task]], cycle_time: int) -> float:
+def balanced_objective(solution: List[Station], cycle_time: int) -> float:
     """MINIMIZE the objective to create solutions with balanced workload"""
     result = 0
     for station in solution:
-        result += pow((compute_station_time(station) / cycle_time), 2)
+        result += pow(( station.get_time() / cycle_time), 2)
     return result
 
 
 def imbalanced_objective(
-    solution: List[List[Task]], cycle_time: int, eps: float = 0.001
+    solution: List[Station], cycle_time: int, eps: float = 0.001
 ) -> float:
     """MAXIMIZE the objective to create imbalanced solutions"""
     result = 0
     for station in solution:
-        result += pow((cycle_time - compute_station_time(station) + eps), -1)
+        result += pow((cycle_time - station.get_time() + eps), -1)
     return result
 
 
@@ -52,13 +53,13 @@ def imbalanced_variation(x: float, y: float) -> float:
 
 
 def improve_solution(
-    solution: List[List[Task]],
+    solution: List[Station],
     instance: GraphInstance,
     probability_threshold: float = 0.75,
-) -> List[List[Task]]:
+) -> List[Station]:
     """Try to improve a solution by exchanging the position of tasks"""
 
-    flattened_solution = [task for station in solution for task in station]
+    flattened_solution = [task for station in solution for task in station.tasks]
     num_tasks = len(flattened_solution)
     # print(f"Sequence pi: {flattened_solution}")
 
