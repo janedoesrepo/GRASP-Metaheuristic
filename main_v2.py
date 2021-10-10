@@ -89,7 +89,7 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
             "sol": solution,
         }
 
-        print(f"Applying GRASP-10 metaheuristic")
+        print(f"Applying GRASP-10 Metaheuristic")
 
         t5 = perf_counter()
         solution = run_grasp(instance, num_iter=10)

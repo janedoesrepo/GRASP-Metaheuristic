@@ -79,7 +79,7 @@ class StationOrientedStrategy(OptimizationStrategy):
             chosen_task = ordered_candidate_value_list[0][0]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.add_task(chosen_task)
+            current_station.add(chosen_task)
             candidate_list.remove(chosen_task)
 
             # Remove the chosen task as a predecessor from all other candidates
@@ -141,7 +141,7 @@ class TaskOrientedStrategy(OptimizationStrategy):
                 current_station = stations[-1]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.add_task(chosen_task)
+            current_station.add(chosen_task)
             candidate_list.remove(chosen_task)
 
             # Remove the chosen task as a predecessor from all other candidates

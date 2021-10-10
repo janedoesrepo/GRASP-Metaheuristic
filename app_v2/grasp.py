@@ -68,7 +68,7 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[Station]:
         chosen_task = random.choice(restricted_candidates)
 
         # assign the chosen task to the current station and remove it from candidate list
-        current_station.add_task(chosen_task)
+        current_station.add(chosen_task)
         candidate_list.remove(chosen_task)
 
         # Remove the chosen task as a predecessor from all other candidates

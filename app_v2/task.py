@@ -10,6 +10,10 @@ class Task:
     predecessors: List[int] = field(default_factory=list, init=False, repr=False)
     setup_times: List[int] = field(default_factory=list, init=False, repr=False)
 
+    def __eq__(self, other) -> bool:
+        """A task is identified by its id"""
+        return self.id == other.id
+
     def has_predecessors(self) -> bool:
         """Returns True if the list of predecessors is not empty"""
         return len(self.predecessors)

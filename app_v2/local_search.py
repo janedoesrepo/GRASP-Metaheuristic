@@ -15,7 +15,7 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
 
     for task in sequence:
         if current_station.fits_task(task, cycle_time):
-            current_station.add_task(task)
+            current_station.add(task)
         else:
             solution.append(Station([task]))
             current_station = solution[-1]
@@ -62,7 +62,7 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
     """Try to improve a solution by exchanging the position of tasks"""
 
     # create a flattened version of the solution
-    solution_sequence = [task for station in solution for task in station.tasks]
+    solution_sequence = [task for station in solution for task in station.task_list]
     num_tasks = len(solution_sequence)
 
     current_sequence = solution_sequence.copy()
