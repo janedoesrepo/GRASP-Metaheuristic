@@ -1,38 +1,14 @@
 import pandas as pd
 import pathlib
-import copy
-from dataclasses import dataclass, field
 from typing import List
+
+from app_v2.task import Task
 
 
 def compute_ARD(solution, best_solution) -> float:
     """Compute the average relative deviation of a solution"""
     ARD = 100 * ((solution["m"] - best_solution) / best_solution)
     return ARD
-
-
-@dataclass()
-class Task:
-    id: int
-    processing_time: int
-    predecessors: List[int] = field(default_factory=list, init=False, repr=False)
-    setup_times: List[int] = field(default_factory=list, init=False, repr=False)
-
-    def has_predecessors(self) -> bool:
-        return len(self.predecessors)
-
-    def __deepcopy__(self, memo):
-
-        id_self = id(self)
-
-        _copy = memo.get(id_self)
-        if _copy is None:
-            _copy = type(self)(
-                copy.deepcopy(self.id, memo), copy.deepcopy(self.processing_time, memo)
-            )
-            _copy.predecessors = self.predecessors.copy()
-            _copy.setup_times = self.setup_times
-        return _copy
 
 
 class GraphInstance:

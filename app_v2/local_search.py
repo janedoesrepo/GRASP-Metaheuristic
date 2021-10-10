@@ -1,8 +1,8 @@
-from app_v2.graph import GraphInstance, Task
 import random
+from typing import Callable, List, Tuple
 
 from app_v2.station import Station
-from typing import List
+from app_v2.task import Task
 
 
 def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
@@ -10,7 +10,6 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
     by assigning its tasks one by one to a station as long as the station does not
     exceed the cycle time. Once it does, open a new station and continue assigning."""
 
-    # print(f"Reassembling sequence: {sequence}")
     solution: List[Station] = [Station()]
     current_station = solution[-1]
 
@@ -20,26 +19,25 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
         else:
             solution.append(Station([task]))
             current_station = solution[-1]
+            
+    # [solution[-1].add_task(task)
+    #  if solution[-1].fits_task(task, cycle_time)
+    #  else solution.append(Station([task]))
+    #  for task in sequence]
 
     return solution
 
 
 def balanced_objective(solution: List[Station], cycle_time: int) -> float:
     """MINIMIZE the objective to create solutions with balanced workload"""
-    result = 0
-    for station in solution:
-        result += pow(( station.get_time() / cycle_time), 2)
-    return result
+    per_station_values = [pow(( station.get_time() / cycle_time), 2) for station in solution]
+    return sum(per_station_values)
 
 
-def imbalanced_objective(
-    solution: List[Station], cycle_time: int, eps: float = 0.001
-) -> float:
+def imbalanced_objective(solution: List[Station], cycle_time: int, eps: float = 0.001) -> float:
     """MAXIMIZE the objective to create imbalanced solutions"""
-    result = 0
-    for station in solution:
-        result += pow((cycle_time - station.get_time() + eps), -1)
-    return result
+    per_station_values = [pow((cycle_time - station.get_time() + eps), -1) for station in solution]
+    return sum(per_station_values)
 
 
 def balanced_variation(x: float, y: float) -> float:
@@ -52,36 +50,33 @@ def imbalanced_variation(x: float, y: float) -> float:
     return y - x
 
 
-def improve_solution(
-    solution: List[Station],
-    instance: GraphInstance,
-    probability_threshold: float = 0.75,
-) -> List[Station]:
+def get_objective_functions(probability_threshold: float) -> Tuple[Callable, Callable]:
+    """Returns two objective functions based on a random behaviour."""
+    if random.random() <= probability_threshold:
+        return balanced_objective, balanced_variation
+    else:
+        return imbalanced_objective, imbalanced_variation
+
+
+def improve_solution(solution: List[Station], cycle_time: int, probability_threshold: float = 0.75) -> List[Station]:
     """Try to improve a solution by exchanging the position of tasks"""
 
-    flattened_solution = [task for station in solution for task in station.tasks]
-    num_tasks = len(flattened_solution)
-    # print(f"Sequence pi: {flattened_solution}")
+    # create a flattened version of the solution
+    solution_sequence = [task for station in solution for task in station.tasks]
+    num_tasks = len(solution_sequence)
 
-    current_sequence = flattened_solution.copy()
+    current_sequence = solution_sequence.copy()
 
     while True:
 
         feasible_exchanges = {}
 
-        # choose balanced workload objective function with probability threshold
-        if random.random() <= probability_threshold:
-            objective_function = balanced_objective
-            variation_function = balanced_variation
-        else:
-            objective_function = imbalanced_objective
-            variation_function = imbalanced_variation
+        # Randomly choose the objective functions
+        calculate_objective, calculate_variation = get_objective_functions(probability_threshold)
 
         # initialise current solution
-        current_solution = reassemble(current_sequence, instance.cycle_time)
-        current_solution_value = objective_function(
-            current_solution, instance.cycle_time
-        )
+        current_solution = reassemble(current_sequence, cycle_time)
+        current_solution_value = calculate_objective(current_solution, cycle_time)
         current_solution_m = len(current_solution)
 
         """Iterate over all tasks but the last one and check
@@ -93,14 +88,14 @@ def improve_solution(
                 right_task = current_sequence[j]
 
                 """Checks for feasability of the exchange"""
-                if left_task.id in right_task.predecessors:
+                if right_task.has_predecessor(left_task):
                     # exchange with the right task and all tasks >j unfeasible
                     # we do not need to check any of them. -> escape j-loop
                     break
 
                 # check if any task between the both is a predecessor of the right task
                 for middle_task in current_sequence[i + 1 : j]:
-                    if middle_task.id in right_task.predecessors:
+                    if right_task.has_predecessor(middle_task):
                         # exchange with the right task unfeasible. -> increment j
                         break
 
@@ -109,21 +104,17 @@ def improve_solution(
                     modified_sequence = current_sequence.copy()
                     modified_sequence[i] = right_task
                     modified_sequence[j] = left_task
-                    modified_solution = reassemble(
-                        modified_sequence, instance.cycle_time
-                    )
+                    modified_solution = reassemble(modified_sequence, cycle_time)
 
                     # add indices of task left and right to the dict of feasible exchanges
                     # and save the objective function value f() and the number of stations
-                    mod_sol_value = objective_function(
-                        modified_solution, instance.cycle_time
+                    mod_sol_value = calculate_objective(
+                        modified_solution, cycle_time
                     )
 
                     feasible_exchanges[(i, j)] = {
                         "m": len(modified_solution),
-                        "var": variation_function(
-                            mod_sol_value, current_solution_value
-                        ),
+                        "var": calculate_variation(mod_sol_value, current_solution_value),
                         "seq": modified_sequence.copy(),
                     }
 
@@ -151,4 +142,6 @@ def improve_solution(
         else:
             break
 
-    return reassemble(current_sequence, instance.cycle_time)
+    improved_solution = reassemble(current_sequence, cycle_time)
+
+    return improved_solution

@@ -2,14 +2,15 @@ import copy
 import random
 from app_v2.station import Station
 from .local_search import improve_solution
-from app_v2.graph import GraphInstance, Task
+from app_v2.graph import GraphInstance
+from app_v2.task import Task
 from typing import List
 
 
 def calculate_greedy_index(candidate_tasks: List[Task], current_station: Station) -> List[float]:
     """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
 
-    if current_station.is_empty():
+    if current_station.empty():
         return [1 / task.processing_time for task in candidate_tasks]
     else:
         last_task = current_station.last()
@@ -84,7 +85,7 @@ def run_grasp(instance: GraphInstance, num_iter: int = 5, alpha: float = 0.3) ->
     for iteration in range(1, num_iter + 1):
 
         constructed_solution = construct_solution(instance, alpha)
-        improved_solution = improve_solution(constructed_solution, instance)
+        improved_solution = improve_solution(constructed_solution, instance.cycle_time)
 
         # the best solution has the lowest number of stations
         if iteration == 1:

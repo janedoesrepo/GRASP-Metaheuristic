@@ -1,5 +1,5 @@
-from typing import List
 import copy
+from typing import List
 
 from app_v2.graph import GraphInstance
 from app_v2.rules import TaskOrderingRule

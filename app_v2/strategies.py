@@ -1,9 +1,27 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app_v2.graph import Task
 from app_v2.rules import TaskOrderingRule
 from app_v2.station import Station
+from app_v2.task import Task
+
+
+#TODO: the same functions happen in grasp...
+def get_tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
+    """Returns a list of tasks that have no predecessors"""
+    return [task for task in candidates if not task.has_predecessors()]
+
+
+def get_fitting_tasks(candidates: List[Task], station: Station, cycle_time: int) -> List[Task]:
+    """Returns a list of tasks that fit into the station"""
+    return [task for task in candidates if station.fits_task(task, cycle_time)]
+
+
+def remove_from_predecessors(new_task: Task, tasks: List[Task]) -> None:
+    """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
+    for task in tasks:
+        if task.has_predecessor(new_task):
+            task.remove_predecessor(new_task)
 
 
 class OptimizationStrategy(ABC):
@@ -41,16 +59,10 @@ class StationOrientedStrategy(OptimizationStrategy):
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidate_tasks = [
-                task for task in candidate_list if not task.has_predecessors()
-            ]
+            candidate_tasks = get_tasks_without_predecessors(candidate_list)
 
             # Condition 2: tasks fit into the current station
-            candidate_tasks = [
-                task
-                for task in candidate_tasks
-                if current_station.fits_task(task, cycle_time)
-            ]
+            candidate_tasks = get_fitting_tasks(candidate_tasks, current_station, cycle_time)
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidate_tasks):
@@ -71,9 +83,7 @@ class StationOrientedStrategy(OptimizationStrategy):
             candidate_list.remove(chosen_task)
 
             # Remove the chosen task as a predecessor from all other candidates
-            for task in candidate_list:
-                if chosen_task.id in task.predecessors:
-                    task.predecessors.remove(chosen_task.id)
+            remove_from_predecessors(chosen_task, candidate_list)
 
         return stations
 
@@ -104,11 +114,9 @@ class TaskOrientedStrategy(OptimizationStrategy):
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidate_tasks = [
-                task for task in candidate_list if not task.has_predecessors()
-            ]
+            candidate_tasks = get_tasks_without_predecessors(candidate_list)
 
-            # order the list of station candidates (TODO: what i the correct station argument?)
+            # order the list of station candidates (TODO: what is the correct station argument?)
             ordered_candidate_value_list = ordering_rule.order_tasks(
                 candidate_tasks, current_station
             )
@@ -137,8 +145,6 @@ class TaskOrientedStrategy(OptimizationStrategy):
             candidate_list.remove(chosen_task)
 
             # Remove the chosen task as a predecessor from all other candidates
-            for task in candidate_list:
-                if chosen_task.id in task.predecessors:
-                    task.predecessors.remove(chosen_task.id)
+            remove_from_predecessors(chosen_task, candidate_list)
 
         return stations

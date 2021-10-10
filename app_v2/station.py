@@ -1,12 +1,16 @@
 from dataclasses import dataclass, field
 from typing import List
 
-from app_v2.graph import Task
+from app_v2.task import Task
 
 
 @dataclass
 class Station:
     tasks: List[Task] = field(default_factory=list)
+    
+    def __add__(self, station) -> None:
+        """Create + operand for station"""
+        return self.tasks + station.tasks
     
     def add_task(self, task: Task) -> None:
         """Adds a task to the Station"""
@@ -16,15 +20,20 @@ class Station:
         """Removes a task from the Station"""
         self.tasks.remove(task)
         
-    def is_empty(self) -> bool:
+    def empty(self) -> bool:
         """Returns True if there are no tasks assigned to the Station"""
         return len(self.tasks) == 0
     
+    def first(self) -> Task:
+        """Returns the first task in the Station"""
+        return self.tasks[0]
+    
     def last(self) -> Task:
-        """Returns the last tasks in the Station"""
+        """Returns the last task in the Station"""
         return self.tasks[-1]
     
     def fits_task(self, task: Task, cycle_time: int) -> bool:
+        """Returns True if adding the task to the station does not exceed the cycle time"""
         
         self.add_task(task)
         station_time = self.get_time()
@@ -38,7 +47,7 @@ class Station:
     def get_time(self) -> int:
         """Computes the time that a station needs to complete all its tasks"""
 
-        if self.is_empty():
+        if self.empty():
             return 0
 
         # TODO: modeling the last task as the predecessor of the first task should
@@ -53,17 +62,17 @@ class Station:
             elif task_index == len(self.tasks) - 1:
                 # task is last in station
                 predecessor = self.tasks[task_index - 1]
-                successor = self.tasks[0]
+                successor = self.first()
                 station_time += (
                     task.processing_time
-                    + predecessor.setup_times[task.id]
-                    + task.setup_times[successor.id]
+                    + predecessor.setup_time(task)
+                    + task.setup_time(successor)
                 )
 
             else:
                 # task is in between
                 predecessor = self.tasks[task_index - 1]
-                station_time += task.processing_time + predecessor.setup_times[task.id]
+                station_time += task.processing_time + predecessor.setup_time(task)
 
         return station_time
         
