@@ -7,7 +7,7 @@ from task import Task
 from typing import List
 
 
-def calculate_greedy_index(candidate_tasks: List[Task], current_station: Station) -> List[float]:
+def greedy_indices(candidate_tasks: List[Task], current_station: Station) -> List[float]:
     """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
 
     if current_station.empty():
@@ -15,15 +15,12 @@ def calculate_greedy_index(candidate_tasks: List[Task], current_station: Station
     else:
         last_task = current_station.last()
         return [
-            1 / (task.processing_time + last_task.setup_times[task.id])
+            1 / (task.processing_time + last_task.setup_time[task])
             for task in candidate_tasks
         ]
 
 
-def construct_solution(instance: GraphInstance, alpha: float) -> List[Station]:
-
-    # get a mutable copy of the original task list
-    candidate_list = copy.deepcopy(instance.tasks)
+def construct_solution(candidate_list: List[Task], cycle_time: int, alpha: float = 0.3) -> List[Station]:
 
     # Initialise solution with one empty station
     current_station = Station()
@@ -32,15 +29,13 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[Station]:
     while len(candidate_list):
 
         # Condition 1: candidates are tasks that have no precedence relations
-        candidate_tasks = [
-            task for task in candidate_list if not task.has_predecessors()
-        ]
+        candidate_tasks = [task for task in candidate_list if not task.has_predecessors()]
 
         # Condition 2: tasks fit into the current station
         candidate_tasks = [
             task
             for task in candidate_tasks
-            if current_station.fits_task(task, instance.cycle_time)
+            if current_station.fits_task(task, cycle_time)
         ]
 
         # if there are no candidates for the current station open a new empty station
@@ -50,7 +45,7 @@ def construct_solution(instance: GraphInstance, alpha: float) -> List[Station]:
             continue
 
         # compute the greedy-Index g() for each candidate task
-        greedy_index = calculate_greedy_index(candidate_tasks, current_station)
+        greedy_index = greedy_indices(candidate_tasks, current_station)
 
         # Compute threshold function
         gmax = max(greedy_index)
@@ -83,8 +78,11 @@ def run_grasp(instance: GraphInstance, num_iter: int = 5, alpha: float = 0.3) ->
     """Apply Greedy Randomized Search Procedure (GRASP)"""
 
     for iteration in range(1, num_iter + 1):
-
-        constructed_solution = construct_solution(instance, alpha)
+        
+        # get a mutable copy of the original task list
+        candidate_list = copy.deepcopy(instance.tasks)
+        
+        constructed_solution = construct_solution(candidate_list, instance.cycle_time, alpha=alpha)
         improved_solution = improve_solution(constructed_solution, instance.cycle_time)
 
         # the best solution has the lowest number of stations
