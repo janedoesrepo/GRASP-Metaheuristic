@@ -55,30 +55,30 @@ def compute_ARD(solution_stations: int, min_stations: int) -> float:
 def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic]):
 
     solutions = []
-    best_solutions = {}
 
     for instance in instances:
 
-        t0 = perf_counter()
+        instance_start = perf_counter()
 
-        instance_solutions = {}
         # Load the data from the instance's .txt-file
         instance.parse_instance()
 
         # Apply heuristics to instance
+        instance_solutions = []
         for heuristic in heuristics:
 
-            t1 = perf_counter()
+            heuristic_start = perf_counter()
             stations = heuristic.solve_instance(instance)
-            t2 = perf_counter()
+            heuristic_end = perf_counter()
 
-            heuristic_runtime = t2 - t1
-            instance_solutions[f"{heuristic}"] = {
+            heuristic_runtime = heuristic_end - heuristic_start
+            instance_solutions.append({
                 'Instance': f"{instance}",
                 'Heuristic': f"{heuristic}",
                 'Num_Stations': len(stations),
-                "Runtime": heuristic_runtime,
-            }
+                "Runtime": heuristic_runtime
+                #TODO: Add the Sequence for export
+            })
         
         # Apply GRASP to instance
         iterations = [5, 10]
@@ -91,32 +91,33 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
             grasp_end = perf_counter()
 
             grasp_runtime = grasp_end - grasp_start
-            instance_solutions[f"GRASP-{num_iterations}"] = {
+            instance_solutions.append({
                 'Instance': f"{instance}",
                 'Heuristic': f"GRASP-{num_iterations}",
                 'Num_Stations': len(stations),
-                "Runtime": grasp_runtime,
-            }
+                "Runtime": grasp_runtime
+            })
 
- 
-        print(f"Postprocessing")
+
+        print(f"Instance Postprocessing")
+        
         # Find the best solution for the instance in terms of the minimum number of stations
-        min_stations = min([result['Num_Stations'] for _, result in instance_solutions.items()])
+        min_stations = min([solution['Num_Stations'] for solution in instance_solutions])
         
         # compute Average Relative Deviation for each solution
-        for _, result in instance_solutions.items():
-            result['Min_Stations'] = min_stations
-            result['ARD'] = compute_ARD(result['Num_Stations'], min_stations)
+        for solution in instance_solutions:
+            solution['Min_Stations'] = min_stations
+            solution['ARD'] = compute_ARD(solution['Num_Stations'], min_stations)
+        
+        solutions.extend(instance_solutions)
         
         # Export the results for this instance to csv
-        export_instance_result(f"{instance}", instance_solutions)
-        
-        best_solutions[f"{instance}"] = min_stations
+        export_instance_result(instance_solutions, filename=f"{instance}")
 
-        print("Experiment Runtime:", perf_counter() - t0)
-        print("-" * 25, "\n")
+        print("Experiment Runtime:", perf_counter() - instance_start)
+        print("=" * 50, "\n")
 
-    return solutions, best_solutions
+    return solutions
 
 
 def main(num_instances: int):
@@ -126,10 +127,10 @@ def main(num_instances: int):
     heuristics = create_heuristics()
 
     # run experiments
-    solutions, best_solutions = run_experiments(instances, heuristics)
+    solutions = run_experiments(instances, heuristics)
 
     # save experiments to disc
-    export_results(solutions, best_solutions)
+    export_results(solutions, filename='all_results')
 
 
 if __name__ == "__main__":
