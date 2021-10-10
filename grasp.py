@@ -15,7 +15,7 @@ def greedy_indices(candidate_tasks: List[Task], current_station: Station) -> Lis
     else:
         last_task = current_station.last()
         return [
-            1 / (task.processing_time + last_task.setup_time[task])
+            1 / (task.processing_time + last_task.setup_time(task))
             for task in candidate_tasks
         ]
 

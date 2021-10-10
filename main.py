@@ -46,6 +46,11 @@ class Experiment:
     pass
 
 
+def best_solution(instance_solutions: List) -> int:
+    """Returns the minimum number of stations from all solutions"""
+    return min([solution['Num_Stations'] for solution in instance_solutions])
+
+
 def compute_ARD(solution_stations: int, min_stations: int) -> float:
     """Compute the average relative deviation of a solution"""
     ARD = 100 * ((solution_stations - min_stations) / min_stations)
@@ -102,9 +107,9 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
         print(f"Instance Postprocessing")
         
         # Find the best solution for the instance in terms of the minimum number of stations
-        min_stations = min([solution['Num_Stations'] for solution in instance_solutions])
+        min_stations = best_solution(instance_solutions)
         
-        # compute Average Relative Deviation for each solution
+        # Add min_stations and compute Average Relative Deviation for each solution
         for solution in instance_solutions:
             solution['Min_Stations'] = min_stations
             solution['ARD'] = compute_ARD(solution['Num_Stations'], min_stations)
