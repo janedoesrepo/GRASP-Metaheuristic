@@ -58,7 +58,7 @@ class Station:
             station_time = 0
             for task in self.task_list:
                 predecessor = self.predecessor(task)
-                station_time += task.processing_time + predecessor.setup_time(task)
+                station_time += predecessor.setup_time(task) + task.processing_time
 
             return station_time
         

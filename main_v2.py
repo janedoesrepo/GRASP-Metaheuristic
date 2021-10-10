@@ -4,7 +4,7 @@ from typing import List
 from app_v2.graph import GraphInstance
 from app_v2.grasp import run_grasp
 from app_v2.heuristic import Heuristic
-from app_v2.io import export_results
+from app_v2.io import export_instance_result, export_results
 from app_v2.rules import TaskOrderingRule
 from app_v2.strategies import OptimizationStrategy
 
@@ -43,19 +43,25 @@ def create_heuristics() -> List[Heuristic]:
 
 class Experiment:
     """Model an experiment that takes an GraphInstance and a Heuristic/GRASP"""
-
     pass
+
+
+def compute_ARD(solution_stations: int, min_stations: int) -> float:
+    """Compute the average relative deviation of a solution"""
+    ARD = 100 * ((solution_stations - min_stations) / min_stations)
+    return ARD
 
 
 def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic]):
 
-    solutions = {}
+    solutions = []
     best_solutions = {}
 
     for instance in instances:
 
         t0 = perf_counter()
 
+        instance_solutions = {}
         # Load the data from the instance's .txt-file
         instance.parse_instance()
 
@@ -63,48 +69,49 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
         for heuristic in heuristics:
 
             t1 = perf_counter()
-            solution = heuristic.solve_instance(instance)
+            stations = heuristic.solve_instance(instance)
             t2 = perf_counter()
 
-            runtime = t2 - t1
-            instance.solutions[heuristic] = {
-                "m": len(solution),
-                "rt": runtime,
-                "sol": solution,
+            heuristic_runtime = t2 - t1
+            instance_solutions[f"{heuristic}"] = {
+                'Instance': f"{instance}",
+                'Heuristic': f"{heuristic}",
+                'Num_Stations': len(stations),
+                "Runtime": heuristic_runtime,
             }
-            # print(f"Number of stations: {len(solution)}")
+        
+        # Apply GRASP to instance
+        iterations = [5, 10]
 
-        solutions[instance] = instance.solutions
+        for num_iterations in iterations:
+            print(f"Applying GRASP-{num_iterations} Metaheuristic")
 
-        print(f"Applying GRASP-5 metaheuristic")
+            grasp_start = perf_counter()
+            stations = run_grasp(instance)
+            grasp_end = perf_counter()
 
-        t3 = perf_counter()
-        solution = run_grasp(instance)
-        t4 = perf_counter()
+            grasp_runtime = grasp_end - grasp_start
+            instance_solutions[f"GRASP-{num_iterations}"] = {
+                'Instance': f"{instance}",
+                'Heuristic': f"GRASP-{num_iterations}",
+                'Num_Stations': len(stations),
+                "Runtime": grasp_runtime,
+            }
 
-        runtime = t4 - t3
-        instance.solutions["GRASP-5"] = {
-            "m": len(solution),
-            "rt": runtime,
-            "sol": solution,
-        }
-
-        print(f"Applying GRASP-10 Metaheuristic")
-
-        t5 = perf_counter()
-        solution = run_grasp(instance, num_iter=10)
-        t6 = perf_counter()
-
-        runtime = t6 - t5
-        instance.solutions["GRASP-10"] = {
-            "m": len(solution),
-            "rt": runtime,
-            "sol": solution,
-        }
-
+ 
         print(f"Postprocessing")
-        best_solution = instance.postprocess()
-        best_solutions[instance] = best_solution
+        # Find the best solution for the instance in terms of the minimum number of stations
+        min_stations = min([result['Num_Stations'] for _, result in instance_solutions.items()])
+        
+        # compute Average Relative Deviation for each solution
+        for _, result in instance_solutions.items():
+            result['Min_Stations'] = min_stations
+            result['ARD'] = compute_ARD(result['Num_Stations'], min_stations)
+        
+        # Export the results for this instance to csv
+        export_instance_result(f"{instance}", instance_solutions)
+        
+        best_solutions[f"{instance}"] = min_stations
 
         print("Experiment Runtime:", perf_counter() - t0)
         print("-" * 25, "\n")

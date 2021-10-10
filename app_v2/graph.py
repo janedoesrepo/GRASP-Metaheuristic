@@ -1,14 +1,6 @@
-import pandas as pd
-import pathlib
 from typing import List
 
 from app_v2.task import Task
-
-
-def compute_ARD(solution, best_solution) -> float:
-    """Compute the average relative deviation of a solution"""
-    ARD = 100 * ((solution["m"] - best_solution) / best_solution)
-    return ARD
 
 
 class GraphInstance:
@@ -21,9 +13,6 @@ class GraphInstance:
         self.filename = f"{self}.txt"
 
         self.tasks: List[Task] = []
-
-        """TODO: Move this outside of here"""
-        self.solutions = {}
 
     def __str__(self):
         return f"{self.graph}_{self.variant}_EJ{self.ident}"
@@ -63,45 +52,3 @@ class GraphInstance:
                 self.tasks[i].setup_times = list(map(int, setup_times_i))
 
             print(f"*Import of {self} successful!*")
-
-    def postprocess(self):
-        
-        # find best solution BS
-        best_solution = min([solution["m"] for _, solution in self.solutions.items()])
-
-        # compute Average Relative Deviation for each solution
-        for _, solution in self.solutions.items():
-            solution["ARD"] = compute_ARD(solution, best_solution)
-
-        print(f"Writing results to {self}.csv")
-
-        # Set result dir and create it, if it does not exist
-        result_dir = pathlib.Path(f"app_v2/results/{self.graph}/")
-        result_dir.mkdir(parents=True, exist_ok=True)
-
-        # Write result to file
-        data = [
-            [
-                self,
-                heuristic_name,
-                solution["m"],
-                best_solution,
-                solution["ARD"],
-                solution["rt"],
-            ]
-            for heuristic_name, solution in self.solutions.items()
-        ]
-        df = pd.DataFrame(
-            data,
-            columns=[
-                "Instance",
-                "Heuristic",
-                "Number of Stations",
-                "Best Solution",
-                "ARD",
-                "Runtime",
-            ],
-        )
-        df.to_csv(result_dir / f"{self}.csv", sep=";", index=False)
-        
-        return best_solution

@@ -33,7 +33,7 @@ class Heuristic:
         self.strategy = strategy
         self.ordering_rule = ordering_rule
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.strategy}_{self.ordering_rule}"
 
     def solve_instance(self, instance: GraphInstance) -> List[Station]:

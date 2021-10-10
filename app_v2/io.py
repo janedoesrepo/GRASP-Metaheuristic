@@ -1,4 +1,7 @@
+import pathlib
+from typing import Dict
 import xlsxwriter
+import csv
 
 
 def export_results(solutions, best_solutions) -> None:
@@ -30,3 +33,23 @@ def export_results(solutions, best_solutions) -> None:
             row += 1
 
     workbook.close()
+
+
+def export_instance_result(instance_name: str, instance_solutions: Dict) -> None:
+        
+        print(f"Writing results to {instance_name}.csv")
+        
+        # Set result dir and create it, if it does not exist
+        graph_name = instance_name.split('_')[0]
+        result_dir = pathlib.Path(f"app_v2/results/{graph_name}/")
+        result_dir.mkdir(parents=True, exist_ok=True)
+
+        # Export results to csv
+        with open(result_dir/f'{instance_name}.csv', 'w', newline='') as csvfile:
+            
+            fieldnames = ['Instance', 'Heuristic', 'Num_Stations', 'Min_Stations', 'ARD', 'Runtime']       
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            
+            for _, result in instance_solutions.items():
+                writer.writerow(result)

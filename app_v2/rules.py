@@ -65,16 +65,10 @@ def setups_plus_processing(
     # calculate processing time plus...
     if not station.empty():
         # ... the setup time between last task assigned to the current station and the candidate task
-        return [
-            (task, task.processing_time + station.last().setup_time(task))
-            for task in candidates
-        ]
+        return [(task, task.processing_time + station.last().setup_time(task)) for task in candidates]
     else:
         # ... the mean of all setup times between the candidate task an all other tasks
-        return [
-            (task, task.processing_time + statistics.mean(task.setup_times))
-            for task in candidates
-        ]
+        return [(task, task.processing_time + statistics.mean(task.setup_times)) for task in candidates]
 
 
 def setups_only(candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
