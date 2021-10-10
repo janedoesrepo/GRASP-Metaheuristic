@@ -1,10 +1,10 @@
 import copy
 from typing import List
 
-from app_v2.graph import GraphInstance
-from app_v2.rules import TaskOrderingRule
-from app_v2.station import Station
-from app_v2.strategies import OptimizationStrategy
+from graph import GraphInstance
+from rules import TaskOrderingRule
+from station import Station
+from strategies import OptimizationStrategy
 
 
 class Heuristic:

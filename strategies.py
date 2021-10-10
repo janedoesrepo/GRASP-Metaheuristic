@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from app_v2.rules import TaskOrderingRule
-from app_v2.station import Station
-from app_v2.task import Task
+from rules import TaskOrderingRule
+from station import Station
+from task import Task
 
 
 #TODO: the same functions happen in grasp...

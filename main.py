@@ -1,12 +1,12 @@
 from time import perf_counter
 from typing import List
 
-from app_v2.graph import GraphInstance
-from app_v2.grasp import run_grasp
-from app_v2.heuristic import Heuristic
-from app_v2.io import export_instance_result, export_results
-from app_v2.rules import TaskOrderingRule
-from app_v2.strategies import OptimizationStrategy
+from graph import GraphInstance
+from grasp import run_grasp
+from heuristic import Heuristic
+from rules import TaskOrderingRule
+from strategies import OptimizationStrategy
+from export import export_instance_result, export_results
 
 
 def create_instances(quantity: int = 10) -> List[GraphInstance]:

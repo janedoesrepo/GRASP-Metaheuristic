@@ -1,9 +1,9 @@
 import copy
 import random
-from app_v2.station import Station
-from .local_search import improve_solution
-from app_v2.graph import GraphInstance
-from app_v2.task import Task
+from station import Station
+from local_search import improve_solution
+from graph import GraphInstance
+from task import Task
 from typing import List
 
 

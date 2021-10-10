@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import List, Tuple
 import statistics
 
-from app_v2.station import Station
-from app_v2.task import Task
+from station import Station
+from task import Task
 
 
 class TaskOrderingRule(ABC):

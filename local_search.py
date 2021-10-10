@@ -1,8 +1,8 @@
 import random
 from typing import Callable, List, Tuple
 
-from app_v2.station import Station
-from app_v2.task import Task
+from station import Station
+from task import Task
 
 
 def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:

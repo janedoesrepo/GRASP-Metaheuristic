@@ -1,6 +1,6 @@
 from typing import List
 
-from app_v2.task import Task
+from task import Task
 
 
 class GraphInstance:
