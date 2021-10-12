@@ -1,13 +1,13 @@
+from __future__ import annotations
 import copy
 from dataclasses import dataclass, field
 from typing import List
-from __future__ import annotations
 
 
 @dataclass
 class Task:
     id: int
-    processing_time: int
+    processing_time: int = field(compare=False)
     predecessors: List[int] = field(default_factory=list, init=False, repr=False, compare=False)
     setup_times: List[int] = field(default_factory=list, init=False, repr=False, compare=False)
 
@@ -15,9 +15,9 @@ class Task:
         """Returns True if the list of predecessors is not empty"""
         return len(self.predecessors)
     
-    def has_predecessor(self, other: Task) -> bool:
-        """Returns True if other is a predecessor of self"""
-        return other.id in self.predecessors
+    def is_predecessor(self, other: Task) -> bool:
+        """Returns True if self is a predecessor of other"""
+        return self.id in other.predecessors
     
     def remove_predecessor(self, other: Task) -> None:
         """Remove a task from the list of predecessors"""

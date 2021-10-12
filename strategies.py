@@ -17,11 +17,9 @@ def get_fitting_tasks(candidates: List[Task], station: Station, cycle_time: int)
     return [task for task in candidates if station.fits_task(task, cycle_time)]
 
 
-def remove_from_predecessors(new_task: Task, tasks: List[Task]) -> None:
+def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
     """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
-    for task in tasks:
-        if task.has_predecessor(new_task):
-            task.remove_predecessor(new_task)
+    [task.remove_predecessor(next_task) for task in candidate_list if next_task.is_predecessor(task)]
 
 
 class OptimizationStrategy(ABC):

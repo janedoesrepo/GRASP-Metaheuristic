@@ -1,4 +1,5 @@
 import copy
+from dataclasses import dataclass
 from typing import List
 
 from graph import GraphInstance
@@ -7,6 +8,7 @@ from station import Station
 from strategies import OptimizationStrategy
 
 
+@dataclass
 class Heuristic:
     """Heuristic rules for task assigment
 
@@ -28,10 +30,8 @@ class Heuristic:
      - SH-MaxTS, SH-MaxS, SH-MinTS, SH-MinS and
      - TH-MaxTS, TH-MaxS, TH-MinTS, TH-MinS.
     """
-
-    def __init__(self, strategy: OptimizationStrategy, ordering_rule: TaskOrderingRule):
-        self.strategy = strategy
-        self.ordering_rule = ordering_rule
+    strategy: OptimizationStrategy
+    ordering_rule: TaskOrderingRule
 
     def __str__(self) -> str:
         return f"{self.strategy}_{self.ordering_rule}"

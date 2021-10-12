@@ -81,21 +81,20 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
 
         """Iterate over all tasks but the last one and check
         if an exchange with a task on the right is feasible"""
-        for i in range(num_tasks - 1):
-            left_task = current_sequence[i]
+        for i, left_task in enumerate(current_sequence):
 
             for j in range(i + 1, num_tasks):
                 right_task = current_sequence[j]
 
                 """Checks for feasability of the exchange"""
-                if right_task.has_predecessor(left_task):
+                if left_task.is_predecessor(right_task):
                     # exchange with the right task and all tasks >j unfeasible
                     # we do not need to check any of them. -> escape j-loop
                     break
 
                 # check if any task between the both is a predecessor of the right task
                 for middle_task in current_sequence[i + 1 : j]:
-                    if right_task.has_predecessor(middle_task):
+                    if middle_task.is_predecessor(right_task):
                         # exchange with the right task unfeasible. -> increment j
                         break
 

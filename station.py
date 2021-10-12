@@ -34,7 +34,9 @@ class Station:
         return self.task_list[task_index - 1]
     
     def fits_task(self, other: Task, cycle_time: int) -> bool:
-        """Returns True if adding the task to the station does not exceed the cycle time"""
+        """Returns True if adding the task to the station does not exceed the cycle time
+        TODO: Adding and removing the task is very inefficient. Find another solution.
+        """
         
         self.add(other)
         station_time = self.get_time()
@@ -53,5 +55,6 @@ class Station:
             return self.first().processing_time
         else:
             # If a station has more than two tasks, setup times need to be considered
-            return sum([self.predecessor(task).setup_time(task) + task.processing_time for task in self.task_list])
+            per_task_values = [self.predecessor(task).setup_time(task) + task.processing_time for task in self.task_list]
+            return sum(per_task_values)
         

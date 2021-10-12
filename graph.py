@@ -1,10 +1,9 @@
 from typing import List
-
 from task import Task
 
 
 class GraphInstance:
-    def __init__(self, graph, variant, ident):
+    def __init__(self, graph: str, variant: str, ident: str):
 
         self.graph = graph
         self.variant = variant
