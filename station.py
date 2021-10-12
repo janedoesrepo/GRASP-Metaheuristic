@@ -4,7 +4,7 @@ from typing import List
 from task import Task
 
 
-@dataclass
+@dataclass(eq=False)
 class Station:
     task_list: List[Task] = field(default_factory=list)
     
@@ -28,37 +28,30 @@ class Station:
         """Returns the last task in the Station"""
         return self.task_list[-1]
     
-    def predecessor(self, task: Task) -> Task:
+    def predecessor(self, other: Task) -> Task:
         """Return the predecessor of task in this station"""
-        task_index = self.task_list.index(task)
+        task_index = self.task_list.index(other)
         return self.task_list[task_index - 1]
     
-    def fits_task(self, task: Task, cycle_time: int) -> bool:
+    def fits_task(self, other: Task, cycle_time: int) -> bool:
         """Returns True if adding the task to the station does not exceed the cycle time"""
         
-        self.add(task)
+        self.add(other)
         station_time = self.get_time()
-        self.remove(task)
+        self.remove(other)
         
         return station_time <= cycle_time
         
     def get_time(self) -> int:
-        """Computes the time that a station needs to complete all its tasks"""
+        """Computes the time for a station to complete all tasks in its task list"""
 
-        # An empty station has 0 station time
         if self.empty():
+            # An empty station has 0 station time
             return 0
-        
-        # A station with a single task only needs to process this task
         elif len(self.task_list) == 1:
+            # A station with a single task only needs to process this task
             return self.first().processing_time
-
-        # If a station has more than two tasks, setup times need to be considered
         else:
-            station_time = 0
-            for task in self.task_list:
-                predecessor = self.predecessor(task)
-                station_time += predecessor.setup_time(task) + task.processing_time
-
-            return station_time
+            # If a station has more than two tasks, setup times need to be considered
+            return sum([self.predecessor(task).setup_time(task) + task.processing_time for task in self.task_list])
         

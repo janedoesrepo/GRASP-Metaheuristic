@@ -8,8 +8,8 @@ from __future__ import annotations
 class Task:
     id: int
     processing_time: int
-    predecessors: List[int] = field(default_factory=list, compare=False, init=False, repr=False)
-    setup_times: List[int] = field(default_factory=list, compare=False, init=False, repr=False)
+    predecessors: List[int] = field(default_factory=list, init=False, repr=False, compare=False)
+    setup_times: List[int] = field(default_factory=list, init=False, repr=False, compare=False)
 
     def has_predecessors(self) -> bool:
         """Returns True if the list of predecessors is not empty"""
