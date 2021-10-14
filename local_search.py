@@ -29,15 +29,13 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
 
 
 def balanced_objective(solution: List[Station], cycle_time: int) -> float:
-    """MINIMIZE the objective to create solutions with balanced workload"""
-    per_station_values = [pow(( station.get_time() / cycle_time), 2) for station in solution]
-    return sum(per_station_values)
+    """MINIMIZE the objective to create solutions with a balanced workload"""
+    return sum((station.get_time() / cycle_time)**2 for station in solution)
 
 
 def imbalanced_objective(solution: List[Station], cycle_time: int, eps: float = 0.001) -> float:
-    """MAXIMIZE the objective to create imbalanced solutions"""
-    per_station_values = [pow((cycle_time - station.get_time() + eps), -1) for station in solution]
-    return sum(per_station_values)
+    """MAXIMIZE the objective to create solutions with an imbalanced workload"""
+    return sum(( cycle_time - station.get_time() + eps)*-1 for station in solution)
 
 
 def balanced_variation(x: float, y: float) -> float:
