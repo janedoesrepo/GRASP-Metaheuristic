@@ -17,8 +17,8 @@ def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]
     
     
 def get_threshold(greedy_indices: List[float], alpha: float):
-    gmax = max(greedy_indices)
     gmin = min(greedy_indices)
+    gmax = max(greedy_indices)
     return gmin + alpha * (gmax - gmin)
 
 
