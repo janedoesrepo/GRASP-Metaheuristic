@@ -3,7 +3,7 @@ from task import Task
 
 
 class GraphInstance:
-    def __init__(self, graph: str, variant: str, ident: str):
+    def __init__(self, graph: str, variant: str, ident: int):
 
         self.graph = graph
         self.variant = variant

@@ -13,7 +13,7 @@ class Task:
 
     def has_predecessors(self) -> bool:
         """Returns True if the list of predecessors is not empty"""
-        return len(self.predecessors)
+        return bool(len(self.predecessors))
     
     def is_predecessor(self, other: Task) -> bool:
         """Returns True if self is a predecessor of other"""
