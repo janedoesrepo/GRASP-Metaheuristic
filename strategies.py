@@ -26,13 +26,11 @@ class OptimizationStrategy(ABC):
     """Abstract class that describes the strategy by which the solutions are optimized"""
 
     @abstractmethod
-    def assign_tasks(
-        self,
-        candidate_list: List[Task],
-        ordering_rule: TaskOrderingRule,
-        cycle_time: int,
-    ) -> List[Station]:
+    def assign_tasks(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
         pass
+
+    def __init__(self, ordering_rule: TaskOrderingRule):
+        self.ordering_rule = ordering_rule
 
     def __str__(self):
         return self.__class__.__name__
@@ -42,12 +40,7 @@ class StationOrientedStrategy(OptimizationStrategy):
     """The candidate tasks will be assigned to the current station if processing the task
     does not exceed the instances cycle time. Otherwise a new station is opened."""
 
-    def assign_tasks(
-        self,
-        candidate_list: List[Task],
-        ordering_rule: TaskOrderingRule,
-        cycle_time: int,
-    ) -> List[Station]:
+    def assign_tasks(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
 
         # initialize stations
         stations: List[Station] = [Station()]
@@ -69,7 +62,7 @@ class StationOrientedStrategy(OptimizationStrategy):
                 continue
 
             # order the list of station candidates
-            ordered_candidate_value_list = ordering_rule.order_tasks(
+            ordered_candidate_value_list = self.ordering_rule.order_tasks(
                 candidate_tasks, current_station
             )
 
@@ -98,12 +91,7 @@ class TaskOrientedStrategy(OptimizationStrategy):
     TODO: Procedure is not working correctly. How should the tasks be ordered if there are
     multiple stations they could be assigned to and the setup may change the ordering?"""
 
-    def assign_tasks(
-        self,
-        candidate_list: List[Task],
-        ordering_rule: TaskOrderingRule,
-        cycle_time: int,
-    ) -> List[Station]:
+    def assign_tasks(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
 
         # initialize stations
         stations: List[Station] = [Station()]
@@ -115,7 +103,7 @@ class TaskOrientedStrategy(OptimizationStrategy):
             candidate_tasks = get_tasks_without_predecessors(candidate_list)
 
             # order the list of station candidates (TODO: what is the correct station argument?)
-            ordered_candidate_value_list = ordering_rule.order_tasks(
+            ordered_candidate_value_list = self.ordering_rule.order_tasks(
                 candidate_tasks, current_station
             )
 

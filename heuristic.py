@@ -31,10 +31,9 @@ class Heuristic:
      - TH-MaxTS, TH-MaxS, TH-MinTS, TH-MinS.
     """
     strategy: OptimizationStrategy
-    ordering_rule: TaskOrderingRule
 
     def __str__(self) -> str:
-        return f"{self.strategy}_{self.ordering_rule}"
+        return f"{self.strategy}_{self.strategy.ordering_rule}"
 
     def solve_instance(self, instance: GraphInstance) -> List[Station]:
 
@@ -44,8 +43,6 @@ class Heuristic:
         candidate_list = copy.deepcopy(instance.tasks)
 
         # assign all tasks in candidate list to stations
-        stations = self.strategy.assign_tasks(
-            candidate_list, self.ordering_rule, instance.cycle_time
-        )
+        stations = self.strategy.assign_tasks(candidate_list, instance.cycle_time)
 
         return stations

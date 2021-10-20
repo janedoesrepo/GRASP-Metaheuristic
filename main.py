@@ -33,7 +33,7 @@ def create_heuristics() -> List[Heuristic]:
     strategies = OptimizationStrategy.__subclasses__()
     orderings = TaskOrderingRule.__subclasses__()
     heuristics = [
-        Heuristic(strategy(), ordering())
+        Heuristic(strategy(ordering()))
         for strategy in strategies
         for ordering in orderings
     ]
