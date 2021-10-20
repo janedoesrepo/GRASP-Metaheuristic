@@ -7,20 +7,10 @@ from task import Task
 
 
 class TaskOrderingRule(ABC):
-    """Abstract class that decsribes a rule by which a list of tasks should be ordered.
-
-    Using an abstract class as decribed in the Strategy Pattern has several benefits:
-    - There is no more need for if/else checking of which rule to apply
-    - The addition of new rules is easy
-    - Cleaner implementation of the has-a TaskOrderingRule relation in Heuristic
-
-    On the downside this creates some boiler-plate code. Alternatively the TaskOrderingRules
-    could be written in a functional adaption of the Strategy Pattern and passed as functions.
-    """
+    """Abstract class that decsribes a rule by which a list of tasks should be ordered."""
 
     @abstractmethod
-    def order_tasks(
-        self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
+    def order_tasks(self, candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
         pass
 
     def __str__(self):

@@ -2,10 +2,9 @@ from time import perf_counter
 from typing import List
 
 from graph import GraphInstance
-from grasp import run_grasp
 from heuristic import Heuristic
 from rules import TaskOrderingRule
-from strategies import OptimizationStrategy
+from strategies import GRASP, OptimizationProcedure, StationOrientedStrategy, TaskOrientedStrategy
 from export import export_instance_result, export_results
 
 
@@ -29,14 +28,17 @@ def create_instances(quantity: int = 10) -> List[GraphInstance]:
 
 def create_heuristics() -> List[Heuristic]:
     """Creates a list of heuristics. These are all possible combinations of optimization strategy and ordering rule"""
-
-    strategies = OptimizationStrategy.__subclasses__()
-    orderings = TaskOrderingRule.__subclasses__()
-    heuristics = [
-        Heuristic(strategy(ordering()))
-        for strategy in strategies
-        for ordering in orderings
-    ]
+    
+    strategies: List[OptimizationProcedure] = []
+    ordering_rules = TaskOrderingRule.__subclasses__()
+    for rule in ordering_rules:
+        strategies.append(StationOrientedStrategy(rule()))
+        strategies.append(TaskOrientedStrategy(rule()))
+        
+    for num_iter in [5, 10]:
+        strategies.append(GRASP(num_iter))
+        
+    heuristics = [Heuristic(strategy) for strategy in strategies]
 
     return heuristics
 
@@ -83,24 +85,6 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
                 'Num_Stations': len(stations),
                 "Runtime": heuristic_runtime
                 #TODO: Add the Sequence for export
-            })
-        
-        # Apply GRASP to instance
-        iterations = [5, 10]
-
-        for num_iterations in iterations:
-            print(f"Applying GRASP-{num_iterations} Metaheuristic")
-
-            grasp_start = perf_counter()
-            stations = run_grasp(instance)
-            grasp_end = perf_counter()
-
-            grasp_runtime = grasp_end - grasp_start
-            instance_solutions.append({
-                'Instance': f"{instance}",
-                'Heuristic': f"GRASP-{num_iterations}",
-                'Num_Stations': len(stations),
-                "Runtime": grasp_runtime
             })
 
 
