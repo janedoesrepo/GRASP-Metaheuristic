@@ -35,7 +35,7 @@ def balanced_objective(solution: List[Station], cycle_time: int) -> float:
 
 def imbalanced_objective(solution: List[Station], cycle_time: int, eps: float = 0.001) -> float:
     """MAXIMIZE the objective to create solutions with an imbalanced workload"""
-    return sum(( cycle_time - station.get_time() + eps)*-1 for station in solution)
+    return sum(( cycle_time - station.get_time() + eps)**-1 for station in solution)
 
 
 def balanced_variation(x: float, y: float) -> float:
@@ -60,7 +60,7 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
     """Try to improve a solution by exchanging the position of tasks"""
 
     # create a flattened version of the solution
-    solution_sequence = [task for station in solution for task in station.task_list]
+    solution_sequence = [task for station in solution for task in station]
     num_tasks = len(solution_sequence)
 
     current_sequence = solution_sequence.copy()

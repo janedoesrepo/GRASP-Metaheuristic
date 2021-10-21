@@ -40,7 +40,7 @@ def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]
     if current_station.empty():
         return [1 / task.processing_time for task in candidate_tasks]
     else:
-        return [1 / (current_station.last().setup_time(task) + task.processing_time) for task in candidate_tasks]
+        return [1 / (current_station[-1].setup_time(task) + task.processing_time) for task in candidate_tasks]
     
     
 def get_threshold(greedy_indices: List[float], alpha: float):
