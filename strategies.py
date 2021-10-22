@@ -1,14 +1,12 @@
+import copy
+import random
 from abc import ABC, abstractmethod
-from typing import List
-
 from graph import GraphInstance
+from local_search import improve_solution
 from rules import TaskOrderingRule
 from station import Station
 from task import Task
-
-import copy
-import random
-from local_search import improve_solution
+from typing import List
 
 
 def get_tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
@@ -16,17 +14,17 @@ def get_tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
     return [task for task in candidates if not task.has_predecessors()]
 
 
-def get_fitting_tasks(candidates: List[Task], station: Station, cycle_time: int) -> List[Task]:
+def get_fitting_tasks(candidates: List[Task], station: Station) -> List[Task]:
     """Returns a list of tasks that fit into the station"""
-    return [task for task in candidates if station.fits_task(task, cycle_time)]
+    return [task for task in candidates if station.fits_task(task)]
 
 
-def get_candidates(candidate_list: List[Task], current_station: Station, cycle_time) -> List[Task]:
+def get_candidates(candidate_list: List[Task], current_station: Station) -> List[Task]:
     # Condition 1: candidates are tasks that have no precedence relations
     candidates = get_tasks_without_predecessors(candidate_list)
 
     # Condition 2: tasks fit into the current station
-    return get_fitting_tasks(candidates, current_station, cycle_time)
+    return get_fitting_tasks(candidates, current_station)
 
 
 def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
@@ -92,18 +90,18 @@ class StationOrientedStrategy(OptimizationProcedure):
     def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
 
         # initialize stations
-        stations: List[Station] = [Station()]
+        stations: List[Station] = [Station(cycle_time)]
         current_station = stations[-1]
 
         # For a solution all tasks need to be assigned to station
         while len(candidate_list):
 
             # Find candidates for the current station
-            candidates = get_candidates(candidate_list, current_station, cycle_time)
+            candidates = get_candidates(candidate_list, current_station)
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
-                stations.append(Station())
+                stations.append(Station(cycle_time))
                 current_station = stations[-1]
                 continue
 
@@ -113,14 +111,14 @@ class StationOrientedStrategy(OptimizationProcedure):
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            chosen_task = ordered_candidate_value_list[0][0]
+            next_task = ordered_candidate_value_list[0][0]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.add(chosen_task)
-            candidate_list.remove(chosen_task)
+            current_station.append(next_task)
+            candidate_list.remove(next_task)
 
             # Remove the chosen task as a predecessor from all other candidates
-            remove_from_predecessors(chosen_task, candidate_list)
+            remove_from_predecessors(next_task, candidate_list)
 
         return stations
 
@@ -150,7 +148,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
     def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
 
         # initialize stations
-        stations: List[Station] = [Station()]
+        stations: List[Station] = [Station(cycle_time)]
         current_station = stations[-1]
 
         while len(candidate_list):
@@ -164,13 +162,13 @@ class TaskOrientedStrategy(OptimizationProcedure):
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            chosen_task = ordered_candidate_value_list[0][0]
+            next_task = ordered_candidate_value_list[0][0]
 
             # assign chosen task to first station it fits in
             for station in stations:
 
                 # if task does not fit in station, check the next station
-                if not station.fits_task(chosen_task, cycle_time):
+                if not station.fits_task(next_task):
                     continue
 
                 # else no need to check further stations
@@ -179,15 +177,15 @@ class TaskOrientedStrategy(OptimizationProcedure):
             else:
                 # in case for-loop did not encounter a break-statement, else is invoked.
                 # the chosen task did not fit in any open station -> open a new station
-                stations.append(Station())  # open new station
+                stations.append(Station(cycle_time))  # open new station
                 current_station = stations[-1]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.add(chosen_task)
-            candidate_list.remove(chosen_task)
+            current_station.append(next_task)
+            candidate_list.remove(next_task)
 
             # Remove the chosen task as a predecessor from all other candidates
-            remove_from_predecessors(chosen_task, candidate_list)
+            remove_from_predecessors(next_task, candidate_list)
 
         return stations
 
@@ -221,17 +219,17 @@ class GRASP(OptimizationProcedure):
     def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
 
         # Initialise solution with one empty station
-        stations = [Station()]
+        stations = [Station(cycle_time)]
         current_station = stations[-1]
         
         while len(candidate_list):
 
             # Find candidates for the current station
-            candidates = get_candidates(candidate_list, current_station, cycle_time)
+            candidates = get_candidates(candidate_list, current_station)
             
             # If no candidates are found then open a new empty station
             if not len(candidates):
-                stations.append(Station())
+                stations.append(Station(cycle_time))
                 current_station = stations[-1]
                 continue
 
@@ -242,7 +240,7 @@ class GRASP(OptimizationProcedure):
             next_task = random.choice(restricted_candidates)
 
             # assign the next task to the current station and remove it from candidate list
-            current_station.add(next_task)
+            current_station.append(next_task)
             candidate_list.remove(next_task)
 
             # Remove the next task as a predecessor from all other candidates

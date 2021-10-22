@@ -1,25 +1,28 @@
-from __future__ import annotations
-from dataclasses import dataclass, field
 from collections.abc import Sequence
-from typing import Counter, List
-
+from dataclasses import dataclass, field
 from task import Task
+from typing import List
 
 
 @dataclass(eq=False)
 class Station(Sequence):
-    task_list: List[Task] = field(default_factory=list)
+    
+    cycle_time: int
+    data: List[Task] = field(default_factory=list, init=False)
 
-    def __getitem__(self, i: int) -> Task:
+    def __getitem__(self, key):
         """Return the task at index of the Stations task list"""
-        return self.task_list[i]
+        return self.data[key]
     
-    def __len__(self) -> int:
-        return len(self.task_list)
+    def __len__(self):
+        return len(self.data)
     
-    def add(self, task: Task) -> None:
-        """Adds a task to the Station"""
-        self.task_list.append(task)
+    def append(self, task: Task) -> None:
+        """Append a Task object to the Station.
+        TODO make sure only tasks that fit into the station can be appended.
+        Maybe keep track of the current station time instead of calculating it repeatedly.
+        """
+        self.data.append(task)
         
     def empty(self) -> bool:
         """Returns True if there are no tasks assigned to the Station"""
@@ -30,16 +33,16 @@ class Station(Sequence):
         task_index = self.index(other)
         return self[task_index - 1]
     
-    def fits_task(self, other: Task, cycle_time: int) -> bool:
+    def fits_task(self, other: Task) -> bool:
         """Returns True if adding the task to the station does not exceed the cycle time
         TODO: Adding and removing the task is very inefficient. Find another solution.
         """
         
-        self.add(other)
+        self.append(other)
         station_time = self.get_time()
-        self.task_list.remove(other)
+        self.data.remove(other)
         
-        return station_time <= cycle_time
+        return station_time <= self.cycle_time
         
     def get_time(self) -> int:
         """Computes the time for a station to complete all tasks in its task list"""

@@ -12,7 +12,7 @@ class Task:
 
     def has_predecessors(self) -> bool:
         """Returns True if the list of predecessors is not empty"""
-        return bool(len(self.predecessors))
+        return len(self.predecessors) != 0
     
     def is_predecessor(self, other: Task) -> bool:
         """Returns True if self is a predecessor of other"""
@@ -25,16 +25,3 @@ class Task:
     def setup_time(self, other: Task) -> int:
         """Returns the setup time from self to the task passed as an argument"""
         return self.setup_times[other.id]
-
-    # def __deepcopy__(self, memo) -> Task:
-
-    #     id_self = id(self)
-
-    #     _copy = memo.get(id_self)
-    #     if _copy is None:
-    #         _copy = Task(
-    #             copy.deepcopy(self.id, memo), copy.deepcopy(self.processing_time, memo)
-    #         )
-    #         _copy.predecessors = self.predecessors.copy()
-    #         _copy.setup_times = self.setup_times
-    #     return _copy

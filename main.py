@@ -62,15 +62,10 @@ def compute_ARD(solution_stations: int, min_stations: int) -> float:
 def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic]):
 
     solutions = []
-
     for instance in instances:
-
         instance_start = perf_counter()
-
-        # Load the data from the instance's .txt-file
         instance.parse_instance()
 
-        # Apply heuristics to instance
         instance_solutions = []
         for heuristic in heuristics:
 
@@ -86,14 +81,11 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
                 "Runtime": heuristic_runtime
                 #TODO: Add the Sequence for export
             })
-
-
-        print(f"Instance Postprocessing")
         
-        # Find the best solution for the instance in terms of the minimum number of stations
+        # Find the solution with the minimum number of stations
         min_stations = best_solution(instance_solutions)
         
-        # Add min_stations and compute Average Relative Deviation for each solution
+        # Add min_stations and compute Average Relative Deviation to each solution
         for solution in instance_solutions:
             solution['Min_Stations'] = min_stations
             solution['ARD'] = compute_ARD(solution['Num_Stations'], min_stations)

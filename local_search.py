@@ -10,15 +10,16 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
     by assigning its tasks one by one to a station as long as the station does not
     exceed the cycle time. Once it does, open a new station and continue assigning."""
 
-    solution: List[Station] = [Station()]
+    solution: List[Station] = [Station(cycle_time)]
     current_station = solution[-1]
 
     for task in sequence:
-        if current_station.fits_task(task, cycle_time):
-            current_station.add(task)
+        if current_station.fits_task(task):
+            current_station.append(task)
         else:
-            solution.append(Station([task]))
+            solution.append(Station(cycle_time))
             current_station = solution[-1]
+            current_station.append(task)
             
     # [solution[-1].add_task(task)
     #  if solution[-1].fits_task(task, cycle_time)
@@ -28,14 +29,14 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
     return solution
 
 
-def balanced_objective(solution: List[Station], cycle_time: int) -> float:
+def balanced_objective(solution: List[Station]) -> float:
     """MINIMIZE the objective to create solutions with a balanced workload"""
-    return sum((station.get_time() / cycle_time)**2 for station in solution)
+    return sum( pow(station.get_time() / station.cycle_time, 2) for station in solution)
 
 
-def imbalanced_objective(solution: List[Station], cycle_time: int, eps: float = 0.001) -> float:
+def imbalanced_objective(solution: List[Station], eps: float = 0.001) -> float:
     """MAXIMIZE the objective to create solutions with an imbalanced workload"""
-    return sum(( cycle_time - station.get_time() + eps)**-1 for station in solution)
+    return sum( pow(station.cycle_time - station.get_time() + eps, -1) for station in solution)
 
 
 def balanced_variation(x: float, y: float) -> float:
@@ -74,7 +75,7 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
 
         # initialise current solution
         current_solution = reassemble(current_sequence, cycle_time)
-        current_solution_value = calculate_objective(current_solution, cycle_time)
+        current_solution_value = calculate_objective(current_solution)
         current_solution_m = len(current_solution)
 
         """Iterate over all tasks but the last one and check
@@ -105,9 +106,7 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
 
                     # add indices of task left and right to the dict of feasible exchanges
                     # and save the objective function value f() and the number of stations
-                    mod_sol_value = calculate_objective(
-                        modified_solution, cycle_time
-                    )
+                    mod_sol_value = calculate_objective(modified_solution)
 
                     feasible_exchanges[(i, j)] = {
                         "m": len(modified_solution),
