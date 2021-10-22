@@ -170,7 +170,6 @@ class TaskOrientedStrategy(OptimizationProcedure):
                 # if task does not fit in station, check the next station
                 if not station.fits_task(next_task):
                     continue
-
                 # else no need to check further stations
                 break
 
