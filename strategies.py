@@ -9,22 +9,9 @@ from task import Task
 from typing import List
 
 
-def get_tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
+def tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
     """Returns a list of tasks that have no predecessors"""
-    return [task for task in candidates if not task.has_predecessors()]
-
-
-def get_fitting_tasks(candidates: List[Task], station: Station) -> List[Task]:
-    """Returns a list of tasks that fit into the station"""
-    return [task for task in candidates if station.fits_task(task)]
-
-
-def get_candidates(candidate_list: List[Task], current_station: Station) -> List[Task]:
-    # Condition 1: candidates are tasks that have no precedence relations
-    candidates = get_tasks_without_predecessors(candidate_list)
-
-    # Condition 2: tasks fit into the current station
-    return get_fitting_tasks(candidates, current_station)
+    return [task for task in candidates if not len(task.predecessors)]
 
 
 def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
@@ -47,7 +34,7 @@ def get_threshold(greedy_indices: List[float], alpha: float):
     return gmin + alpha * (gmax - gmin)
 
     
-def get_restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
+def restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
     # compute the greedy-Index g() for each candidate task
     greedy_indices = greedy(candidates, current_station)
 
@@ -93,11 +80,13 @@ class StationOrientedStrategy(OptimizationProcedure):
         stations: List[Station] = [Station(cycle_time)]
         current_station = stations[-1]
 
-        # For a solution all tasks need to be assigned to station
         while len(candidate_list):
 
-            # Find candidates for the current station
-            candidates = get_candidates(candidate_list, current_station)
+            # Condition 1: tasks have no precedence relations
+            candidates = tasks_without_predecessors(candidate_list)
+
+            # Condition 2: tasks fit into the current station
+            candidates =  [task for task in candidates if current_station.fits_task(task)]
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
@@ -154,7 +143,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidate_tasks = get_tasks_without_predecessors(candidate_list)
+            candidate_tasks = tasks_without_predecessors(candidate_list)
 
             # order the list of station candidates (TODO: what is the correct station argument?)
             ordered_candidate_value_list = self.ordering_rule.order_tasks(
@@ -164,15 +153,11 @@ class TaskOrientedStrategy(OptimizationProcedure):
             # next task to be sequenced is first in the ordered list of candidates
             next_task = ordered_candidate_value_list[0][0]
 
-            # assign chosen task to first station it fits in
+            # assign next task to first station it fits in
             for station in stations:
-
-                # if task does not fit in station, check the next station
                 if not station.fits_task(next_task):
                     continue
-                # else no need to check further stations
                 break
-
             else:
                 # in case for-loop did not encounter a break-statement, else is invoked.
                 # the chosen task did not fit in any open station -> open a new station
@@ -223,8 +208,11 @@ class GRASP(OptimizationProcedure):
         
         while len(candidate_list):
 
-            # Find candidates for the current station
-            candidates = get_candidates(candidate_list, current_station)
+            # Condition 1: candidates are tasks that have no precedence relations
+            candidates = tasks_without_predecessors(candidate_list)
+
+            # Condition 2: tasks fit into the current station
+            candidates =  [task for task in candidates if current_station.fits_task(task)]
             
             # If no candidates are found then open a new empty station
             if not len(candidates):
@@ -233,10 +221,10 @@ class GRASP(OptimizationProcedure):
                 continue
 
             # Find candidates that fulfill a threshold condition
-            restricted_candidates = get_restricted_candidates(candidates, current_station)        
+            candidates = restricted_candidates(candidates, current_station)        
 
             # next task to be sequenced is picked randomly from the restricted candidate list
-            next_task = random.choice(restricted_candidates)
+            next_task = random.choice(candidates)
 
             # assign the next task to the current station and remove it from candidate list
             current_station.append(next_task)

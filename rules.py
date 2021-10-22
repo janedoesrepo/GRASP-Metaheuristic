@@ -1,9 +1,8 @@
-from abc import ABC, abstractmethod
-from typing import List, Tuple
 import statistics
-
+from abc import ABC, abstractmethod
 from station import Station
 from task import Task
+from typing import List, Tuple
 
 
 class TaskOrderingRule(ABC):
@@ -52,18 +51,16 @@ class MinSOrdering(TaskOrderingRule):
 def setups_plus_processing(candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
     """Return a tuple for each task in the candidate_list and its processing incl. setup time) """
     
-    if not station.empty():
-        return [(task, station[-1].setup_time(task) + task.processing_time) for task in candidates]
-    else:
+    if station.empty():
         return [(task, task.processing_time + statistics.mean(task.setup_times)) for task in candidates]
+    else:
+        return [(task, station[-1].setup_time(task) + task.processing_time) for task in candidates]
 
 
 def setups_only(candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
     """Return a tuple for each task in the candidate_list and its setup time """
-
-    if not station.empty():
-        # only the setup time between last task assigned to the current station and the candidate task
-        return [(task, station[-1].setup_time(task)) for task in candidates]
-    else:
-        # only the mean of all setup times between the candidate task an all other tasks
+    
+    if station.empty():
         return [(task, statistics.mean(task.setup_times)) for task in candidates]
+    else:
+        return [(task, station[-1].setup_time(task)) for task in candidates]
