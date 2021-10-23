@@ -2,7 +2,7 @@ from typing import List
 from task import Task
 
 
-class GraphInstance:
+class Graph:
     def __init__(self, graph: str, variant: str, ident: int):
 
         self.graph = graph

@@ -23,7 +23,7 @@ Hence, the list of strategies that have been defined and tested are:
 import copy
 import random
 from abc import ABC, abstractmethod
-from graph import GraphInstance
+from graph import Graph
 from local_search import improve_solution
 from rules import TaskOrderingRule
 from station import Station
@@ -32,10 +32,10 @@ from typing import List
 
 
 class OptimizationProcedure(ABC):
-    """Abstract class that describes the strategy by which the solutions are optimized"""
+    """Abstract class that describes procedures by which a SUALBPS problem can be optimized"""
 
     @abstractmethod
-    def solve(self, instance: GraphInstance):
+    def solve(self, instance: Graph):
         pass
     
     @abstractmethod
@@ -53,7 +53,7 @@ class StationOrientedStrategy(OptimizationProcedure):
     def __init__(self, ordering_rule: TaskOrderingRule):
         self.ordering_rule = ordering_rule
 
-    def solve(self, instance: GraphInstance) -> List[Station]:
+    def solve(self, instance: Graph) -> List[Station]:
        
         print(f"Applying {self}")
         candidate_list = copy.deepcopy(instance.tasks)
@@ -113,7 +113,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
     def __init__(self, ordering_rule: TaskOrderingRule):
         self.ordering_rule = ordering_rule
     
-    def solve(self, instance: GraphInstance) -> List[Station]:
+    def solve(self, instance: Graph) -> List[Station]:
        
         print(f"Applying {self}")
         candidate_list = copy.deepcopy(instance.tasks)
@@ -166,7 +166,7 @@ class GRASP(OptimizationProcedure):
     def __init__(self, num_iter: int):
         self.num_iter = num_iter
     
-    def solve(self, instance: GraphInstance) -> List[Station]:
+    def solve(self, instance: Graph) -> List[Station]:
           
         print(f"Applying GRASP-{self.num_iter} Metaheuristic")
     

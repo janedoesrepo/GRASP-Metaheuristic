@@ -1,21 +1,22 @@
-from export import export_instance_result, export_results
-from graph import GraphInstance
-from rules import TaskOrderingRule
+import exporter
+from graph import Graph
 from optimizer import GRASP, OptimizationProcedure, StationOrientedStrategy, TaskOrientedStrategy
+from rules import TaskOrderingRule
 from time import perf_counter
-from typing import List
+from typing import Dict, List
 
 
-def create_instances(quantity: int = 10) -> List[GraphInstance]:
+def create_instances(quantity: int = 10) -> List[Graph]:
     """Creates up to 10 instances of all possible combinations of graph and variant"""
 
-    graphs = [  # "ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
+    graphs = [
+        # "ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
         "MITCHELL.IN2",
         # "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"
     ]
     variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
     instances = [
-        GraphInstance(graph, variant, ident)
+        Graph(graph, variant, ident)
         for graph in graphs
         for variant in variants
         for ident in range(1, quantity + 1)
@@ -40,57 +41,54 @@ def create_optimizers() -> List[OptimizationProcedure]:
 
 
 class Experiment:
-    """Model an experiment that takes an GraphInstance and a Heuristic/GRASP"""
-    pass
+    """Model an experiment that takes an Graph instance and an optimizer"""
+    start_time: float = 0.
+    solutions: List[Dict] = []
+    
+    def run(self, instance: Graph, optimizers: List[OptimizationProcedure]):
+        self.start_time = perf_counter()
+        for optimizer in optimizers:
+            optimizer_start = perf_counter()
+            stations = optimizer.solve(instance)
 
-
-def best_solution(instance_solutions: List) -> int:
-    """Returns the minimum number of stations from all solutions"""
-    return min([solution['Num_Stations'] for solution in instance_solutions])
-
-
-def compute_ARD(solution_stations: int, min_stations: int) -> float:
-    """Compute the average relative deviation of a solution"""
-    ARD = 100 * ((solution_stations - min_stations) / min_stations)
-    return ARD
-
-
-def run_experiments(instances: List[GraphInstance], strategies: List[OptimizationProcedure]):
-
-    solutions = []
-    for instance in instances:
-        instance_start = perf_counter()
-        instance.parse_instance()
-
-        instance_solutions = []
-        for strategy in strategies:
-
-            strat_start = perf_counter()
-            stations = strategy.solve(instance)
-            strat_end = perf_counter()
-
-            instance_solutions.append({
+            self.solutions.append({
                 'Instance': f"{instance}",
-                'Strategy': f"{strategy}",
+                'Strategy': f"{optimizer}",
                 'Num_Stations': len(stations),
-                "Runtime": strat_end - strat_start
+                "Runtime": perf_counter() - optimizer_start
                 #TODO: Add the Sequence for export
             })
         
-        # Find the solution with the minimum number of stations
-        min_stations = best_solution(instance_solutions)
-        
-        # Add min_stations and compute Average Relative Deviation to each solution
-        for solution in instance_solutions:
-            solution['Min_Stations'] = min_stations
-            solution['ARD'] = compute_ARD(solution['Num_Stations'], min_stations)
-        
-        solutions.extend(instance_solutions)
-        
-        # Export the results for this instance to csv
-        export_instance_result(instance_solutions, filename=f"{instance}")
+        # Add best solution and compute Average Relative Deviation to each solution
+        best_solution = self.best_solution()
+        for solution in self.solutions:
+            solution['Min_Stations'] = best_solution
+            solution['ARD'] = self.compute_ARD(solution['Num_Stations'], solution['Min_Stations'])     
+            
+    def best_solution(self) -> int:
+        """Returns the minimum number of stations from all solutions"""
+        return min(solution['Num_Stations'] for solution in self.solutions)
 
-        print("Experiment Runtime:", perf_counter() - instance_start)
+    @staticmethod
+    def compute_ARD(solution_stations: int, min_stations: int) -> float:
+        """Compute the average relative deviation of a solution"""
+        ARD = 100 * ((solution_stations - min_stations) / min_stations)
+        return ARD
+
+
+def run_experiments(instances: List[Graph], optimizers: List[OptimizationProcedure]):
+
+    solutions = []
+    for instance in instances:
+        instance.parse_instance()
+
+        experiment = Experiment()
+        experiment.run(instance, optimizers)
+        exporter.export_instance_result(experiment.solutions, filename=f"{instance}")    
+        
+        solutions.extend(experiment.solutions)
+
+        print("Experiment Runtime:", perf_counter() - experiment.start_time)
         print("=" * 50, "\n")
 
     return solutions
@@ -103,10 +101,10 @@ def main(num_instances: int):
     optimizers = create_optimizers()
 
     # run experiments
-    solutions = run_experiments(instances, optimizers)
+    results = run_experiments(instances, optimizers)
 
     # save experiments to disc
-    export_results(solutions, filename='all_results')
+    exporter.export_results(results, filename='all_results')
 
 
 if __name__ == "__main__":
