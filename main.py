@@ -1,11 +1,9 @@
+from export import export_instance_result, export_results
+from graph import GraphInstance
+from rules import TaskOrderingRule
+from optimizer import GRASP, OptimizationProcedure, StationOrientedStrategy, TaskOrientedStrategy
 from time import perf_counter
 from typing import List
-
-from graph import GraphInstance
-from heuristic import Heuristic
-from rules import TaskOrderingRule
-from strategies import GRASP, OptimizationProcedure, StationOrientedStrategy, TaskOrientedStrategy
-from export import export_instance_result, export_results
 
 
 def create_instances(quantity: int = 10) -> List[GraphInstance]:
@@ -26,21 +24,19 @@ def create_instances(quantity: int = 10) -> List[GraphInstance]:
     return instances
 
 
-def create_heuristics() -> List[Heuristic]:
-    """Creates a list of heuristics. These are all possible combinations of optimization strategy and ordering rule"""
+def create_optimizers() -> List[OptimizationProcedure]:
+    """Creates a list of all optimization procedures"""
     
-    strategies: List[OptimizationProcedure] = []
+    optimizers: List[OptimizationProcedure] = []
     ordering_rules = TaskOrderingRule.__subclasses__()
     for rule in ordering_rules:
-        strategies.append(StationOrientedStrategy(rule()))
-        strategies.append(TaskOrientedStrategy(rule()))
+        optimizers.append(StationOrientedStrategy(rule()))
+        optimizers.append(TaskOrientedStrategy(rule()))
         
     for num_iter in [5, 10]:
-        strategies.append(GRASP(num_iter))
-        
-    heuristics = [Heuristic(strategy) for strategy in strategies]
+        optimizers.append(GRASP(num_iter))
 
-    return heuristics
+    return optimizers
 
 
 class Experiment:
@@ -59,7 +55,7 @@ def compute_ARD(solution_stations: int, min_stations: int) -> float:
     return ARD
 
 
-def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic]):
+def run_experiments(instances: List[GraphInstance], strategies: List[OptimizationProcedure]):
 
     solutions = []
     for instance in instances:
@@ -67,18 +63,17 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
         instance.parse_instance()
 
         instance_solutions = []
-        for heuristic in heuristics:
+        for strategy in strategies:
 
-            heuristic_start = perf_counter()
-            stations = heuristic.solve_instance(instance)
-            heuristic_end = perf_counter()
+            strat_start = perf_counter()
+            stations = strategy.solve(instance)
+            strat_end = perf_counter()
 
-            heuristic_runtime = heuristic_end - heuristic_start
             instance_solutions.append({
                 'Instance': f"{instance}",
-                'Heuristic': f"{heuristic}",
+                'Strategy': f"{strategy}",
                 'Num_Stations': len(stations),
-                "Runtime": heuristic_runtime
+                "Runtime": strat_end - strat_start
                 #TODO: Add the Sequence for export
             })
         
@@ -103,12 +98,12 @@ def run_experiments(instances: List[GraphInstance], heuristics: List[Heuristic])
 
 def main(num_instances: int):
 
-    # Create instances and heuristics
+    # Create instances and optimization procedures
     instances = create_instances(quantity=num_instances)
-    heuristics = create_heuristics()
+    optimizers = create_optimizers()
 
     # run experiments
-    solutions = run_experiments(instances, heuristics)
+    solutions = run_experiments(instances, optimizers)
 
     # save experiments to disc
     export_results(solutions, filename='all_results')

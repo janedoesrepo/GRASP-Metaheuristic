@@ -3,12 +3,12 @@ import pathlib
 from typing import Dict, List
 
 
-def write_csv(filepath, solutions) -> None:
+def write_csv(filepath, solutions: List[Dict]) -> None:
     """Exports solutions to csv"""
     
     with open(filepath, 'w', newline='') as csvfile:
         
-        fieldnames = ['Instance', 'Heuristic', 'Num_Stations', 'Min_Stations', 'ARD', 'Runtime']       
+        fieldnames = ['Instance', 'Strategy', 'Num_Stations', 'Min_Stations', 'ARD', 'Runtime']       
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         

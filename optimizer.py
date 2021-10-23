@@ -1,3 +1,25 @@
+"""Optimization Procedures
+
+We differ between two types of optimization proceadur:
+    - the Station oriented strategies (SH) and
+    - the Task oriented strategies (TH).
+
+Ordering rules for candidate selection are:
+    - Maximum setup time plus processing times (MaxTS)
+    - Minimum setup time plus processing times (MinTS)
+    - Maximum setup times (MaxS)
+    - Minimum setup times (MinS)
+
+When we refer to strategy SH-MaxTS, we mean a station oriented strategy that selects next candidate tasks
+(those whose predecessors have already been assigned and can fit in the actual open station) by the
+MAXimum processing time plus setup time.
+
+Hence, the list of strategies that have been defined and tested are:
+    - SH-MaxTS, SH-MaxS, SH-MinTS, SH-MinS and
+    - TH-MaxTS, TH-MaxS, TH-MinTS, TH-MinS as well as
+    - GRASP-5, GRASP-10
+"""
+
 import copy
 import random
 from abc import ABC, abstractmethod
@@ -7,42 +29,6 @@ from rules import TaskOrderingRule
 from station import Station
 from task import Task
 from typing import List
-
-
-def tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
-    """Returns a list of tasks that have no predecessors"""
-    return [task for task in candidates if not len(task.predecessors)]
-
-
-def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
-    """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
-    [task.remove_predecessor(next_task) for task in candidate_list if next_task.is_predecessor(task)]
-
-
-def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]:
-    """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
-
-    if current_station.empty():
-        return [1 / task.processing_time for task in candidate_tasks]
-    else:
-        return [1 / (current_station[-1].setup_time(task) + task.processing_time) for task in candidate_tasks]
-    
-    
-def get_threshold(greedy_indices: List[float], alpha: float):
-    gmin = min(greedy_indices)
-    gmax = max(greedy_indices)
-    return gmin + alpha * (gmax - gmin)
-
-    
-def restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
-    # compute the greedy-Index g() for each candidate task
-    greedy_indices = greedy(candidates, current_station)
-
-    # Compute threshold function
-    threshold = get_threshold(greedy_indices, alpha)
-    
-    # Find candidates that pass the threshold condition
-    return [task for task, greedy_index in zip(candidates, greedy_indices) if greedy_index <= threshold]
 
 
 class OptimizationProcedure(ABC):
@@ -234,3 +220,39 @@ class GRASP(OptimizationProcedure):
             remove_from_predecessors(next_task, candidate_list)
 
         return stations
+
+
+def tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
+    """Returns a list of tasks that have no predecessors"""
+    return [task for task in candidates if not len(task.predecessors)]
+
+
+def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
+    """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
+    [task.remove_predecessor(next_task) for task in candidate_list if next_task.is_predecessor(task)]
+
+
+def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]:
+    """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
+
+    if current_station.empty():
+        return [1 / task.processing_time for task in candidate_tasks]
+    else:
+        return [1 / (current_station[-1].setup_time(task) + task.processing_time) for task in candidate_tasks]
+    
+    
+def get_threshold(greedy_indices: List[float], alpha: float):
+    gmin = min(greedy_indices)
+    gmax = max(greedy_indices)
+    return gmin + alpha * (gmax - gmin)
+
+    
+def restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
+    # compute the greedy-Index g() for each candidate task
+    greedy_indices = greedy(candidates, current_station)
+
+    # Compute threshold function
+    threshold = get_threshold(greedy_indices, alpha)
+    
+    # Find candidates that pass the threshold condition
+    return [task for task, greedy_index in zip(candidates, greedy_indices) if greedy_index <= threshold]
