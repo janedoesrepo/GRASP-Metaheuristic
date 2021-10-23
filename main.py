@@ -4,7 +4,7 @@ from graph import Graph
 from optimizer import GRASP, OptimizationProcedure, StationOrientedStrategy, TaskOrientedStrategy
 from rules import TaskOrderingRule
 from time import perf_counter
-from typing import List
+from typing import Dict, List
 
 
 def create_instances(quantity: int = 10) -> List[Graph]:
@@ -39,8 +39,10 @@ def create_optimizers() -> List[OptimizationProcedure]:
 
     return optimizers
 
-def run_experiments(instances: List[Graph], optimizers: List[OptimizationProcedure]):
+def run_experiments(instances: List[Graph], optimizers: List[OptimizationProcedure]) -> List[Dict]:
 
+    run_start = perf_counter()
+    
     solutions = []
     for instance in instances:
         instance.parse_instance()
@@ -53,6 +55,8 @@ def run_experiments(instances: List[Graph], optimizers: List[OptimizationProcedu
 
         print("Experiment Runtime:", perf_counter() - experiment.start_time)
         print("=" * 50, "\n")
+        
+    print(f"Full Runtime: {perf_counter() - run_start}")
 
     return solutions
 

@@ -31,7 +31,7 @@ class Station(Sequence):
             self.station_time += additional_time
         self.data.append(task)
     
-    def fits_task(self, task: Task) -> bool:
+    def can_fit(self, task: Task) -> bool:
         """Returns True if adding the task to the station does not exceed the cycle time"""
         if self.empty():
             return task.processing_time <= self.cycle_time       

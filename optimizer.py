@@ -55,7 +55,7 @@ class StationOrientedStrategy(OptimizationProcedure):
 
     def solve(self, instance: Graph) -> List[Station]:
        
-        print(f"Applying {self}")
+        print(f"Applying {self} with {self.ordering_rule}")
         candidate_list = copy.deepcopy(instance.tasks)
         solution = self.construct_solution(candidate_list, instance.cycle_time)
         return solution
@@ -72,7 +72,7 @@ class StationOrientedStrategy(OptimizationProcedure):
             candidates = tasks_without_predecessors(candidate_list)
 
             # Condition 2: tasks fit into the current station
-            candidates =  [task for task in candidates if current_station.fits_task(task)]
+            candidates =  [task for task in candidates if current_station.can_fit(task)]
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
@@ -115,7 +115,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
     
     def solve(self, instance: Graph) -> List[Station]:
        
-        print(f"Applying {self}")
+        print(f"Applying {self} with {self.ordering_rule}")
         candidate_list = copy.deepcopy(instance.tasks)
         solution = self.construct_solution(candidate_list, instance.cycle_time)
         return solution
@@ -141,7 +141,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
 
             # assign next task to first station it fits in
             for station in stations:
-                if not station.fits_task(next_task):
+                if not station.can_fit(next_task):
                     continue
                 break
             else:
@@ -198,7 +198,7 @@ class GRASP(OptimizationProcedure):
             candidates = tasks_without_predecessors(candidate_list)
 
             # Condition 2: tasks fit into the current station
-            candidates =  [task for task in candidates if current_station.fits_task(task)]
+            candidates =  [task for task in candidates if current_station.can_fit(task)]
             
             # If no candidates are found then open a new empty station
             if not len(candidates):
