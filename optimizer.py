@@ -1,25 +1,3 @@
-"""Optimization Procedures
-
-We differ between two types of optimization proceadur:
-    - the Station oriented strategies (SH) and
-    - the Task oriented strategies (TH).
-
-Ordering rules for candidate selection are:
-    - Maximum setup time plus processing times (MaxTS)
-    - Minimum setup time plus processing times (MinTS)
-    - Maximum setup times (MaxS)
-    - Minimum setup times (MinS)
-
-When we refer to strategy SH-MaxTS, we mean a station oriented strategy that selects next candidate tasks
-(those whose predecessors have already been assigned and can fit in the actual open station) by the
-MAXimum processing time plus setup time.
-
-Hence, the list of strategies that have been defined and tested are:
-    - SH-MaxTS, SH-MaxS, SH-MinTS, SH-MinS and
-    - TH-MaxTS, TH-MaxS, TH-MinTS, TH-MinS as well as
-    - GRASP-5, GRASP-10
-"""
-
 import copy
 import random
 from abc import ABC, abstractmethod
@@ -32,7 +10,28 @@ from typing import List
 
 
 class OptimizationProcedure(ABC):
-    """Abstract class that describes procedures by which a SUALBPS problem can be optimized"""
+    """Abstract class that describes procedures by which a SUALBPS problem can be optimized
+
+    We differ between three types of optimization procedures:
+        - the Station oriented strategies (SH),
+        - the Task oriented strategies (TH), and
+        - the GRASP Metaheuristics
+
+    Ordering rules for candidate selection are:
+        - Maximum setup time plus processing times (MaxTS)
+        - Minimum setup time plus processing times (MinTS)
+        - Maximum setup times (MaxS)
+        - Minimum setup times (MinS)
+
+    When we refer to strategy SH-MaxTS, we mean a station oriented strategy that selects next candidate tasks
+    (those whose predecessors have already been assigned and can fit in the actual open station) by the
+    MAXimum processing time plus setup time.
+
+    Hence, the list of optimization pocedures that have been defined and tested are:
+        - SH-MaxTS, SH-MaxS, SH-MinTS, SH-MinS and
+        - TH-MaxTS, TH-MaxS, TH-MinTS, TH-MinS as well as
+        - GRASP-5, GRASP-10
+    """
 
     @abstractmethod
     def solve(self, instance: Graph):
@@ -256,3 +255,18 @@ def restricted_candidates(candidates: List[Task], current_station: Station, alph
     
     # Find candidates that pass the threshold condition
     return [task for task, greedy_index in zip(candidates, greedy_indices) if greedy_index <= threshold]
+
+
+def create_optimizers() -> List[OptimizationProcedure]:
+    """Creates a list of all optimization procedures"""
+    
+    optimizers: List[OptimizationProcedure] = []
+    ordering_rules = TaskOrderingRule.__subclasses__()
+    for rule in ordering_rules:
+        optimizers.append(StationOrientedStrategy(rule()))
+        optimizers.append(TaskOrientedStrategy(rule()))
+        
+    for num_iter in [5, 10]:
+        optimizers.append(GRASP(num_iter))
+
+    return optimizers

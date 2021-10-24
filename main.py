@@ -1,8 +1,7 @@
 import exporter
 from experiment import Experiment
 from graph import Graph
-from optimizer import GRASP, OptimizationProcedure, StationOrientedStrategy, TaskOrientedStrategy
-from rules import TaskOrderingRule
+from optimizer import create_optimizers, OptimizationProcedure
 from time import perf_counter
 from typing import Dict, List
 
@@ -25,19 +24,7 @@ def create_instances(quantity: int = 10) -> List[Graph]:
 
     return instances
 
-def create_optimizers() -> List[OptimizationProcedure]:
-    """Creates a list of all optimization procedures"""
-    
-    optimizers: List[OptimizationProcedure] = []
-    ordering_rules = TaskOrderingRule.__subclasses__()
-    for rule in ordering_rules:
-        optimizers.append(StationOrientedStrategy(rule()))
-        optimizers.append(TaskOrientedStrategy(rule()))
-        
-    for num_iter in [5, 10]:
-        optimizers.append(GRASP(num_iter))
 
-    return optimizers
 
 def run_experiments(instances: List[Graph], optimizers: List[OptimizationProcedure]) -> List[Dict]:
 
