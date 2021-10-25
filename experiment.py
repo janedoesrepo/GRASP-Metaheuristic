@@ -9,7 +9,7 @@ class Experiment:
     start_time: float = 0.
     solutions: List[Dict] = []
     
-    def run(self, instance: Graph, optimizers: List[OptimizationProcedure]):
+    def run(self, instance: Graph, optimizers: List[OptimizationProcedure]) -> None:
         self.start_time = perf_counter()
         for optimizer in optimizers:
             optimizer_start = perf_counter()

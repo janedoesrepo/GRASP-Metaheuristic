@@ -1,22 +1,20 @@
+from __future__ import annotations
 from typing import List
 from task import Task
 
 
 class Graph:
-    def __init__(self, graph: str, variant: str, ident: int):
 
-        self.graph = graph
-        self.variant = variant
-        self.ident = ident
+    def __init__(self, tasks: List[Task], cycle_time: int, filename: str = "") -> None:
+        self.tasks = tasks
+        self.cycle_time = cycle_time
+        self.filename = filename
 
-        self.filename = f"{self}.txt"
+    def __str__(self) -> str:
+        return f"{self.filename[:-4]}"
 
-        self.tasks: List[Task] = []
-
-    def __str__(self):
-        return f"{self.graph}_{self.variant}_EJ{self.ident}"
-
-    def parse_instance(self):
+    @staticmethod
+    def parse_instance(filename: str) -> Graph:
         """Import-function for the data set of Martino and Pastor (2010)
         The data is available at https://www.assembly-line-balancing.de/sualbsp
 
@@ -28,26 +26,29 @@ class Graph:
         lines 4+n+p to 4+2n+p-1:    tsu; setup times
         """
 
-        with open("data/Instances/" + self.filename, "r") as file:
+        with open("data/Instances/" + filename, "r") as file:
 
             # read first three lines
             num_tasks = int(file.readline())
             num_relations = int(file.readline())
-            self.cycle_time = int(file.readline())
+            cycle_time = int(file.readline())
 
             # Create tasks with id and processing times
+            tasks = []
             for _ in range(num_tasks):
                 task_id, time = file.readline().split(",")
-                self.tasks.append(Task(int(task_id), int(time)))
+                tasks.append(Task(int(task_id), int(time)))
 
             # Add the ids of its predecessor to each task
             for _ in range(num_relations):
                 predecessor, task_id = file.readline().split(",")
-                self.tasks[int(task_id)].predecessors.append(int(predecessor))
+                tasks[int(task_id)].predecessors.append(int(predecessor))
 
             # Setup times is a matrice of dim num_tasks x num_tasks
             for i in range(num_tasks):
                 setup_times_i = file.readline().split(",")
-                self.tasks[i].setup_times = list(map(int, setup_times_i))
+                tasks[i].setup_times = list(map(int, setup_times_i))
+        
+        print(f"*Import of {filename} successful!*")
 
-            print(f"*Import of {self} successful!*")
+        return Graph(tasks, cycle_time, filename)
