@@ -6,8 +6,10 @@ from typing import Dict, List
 
 class Experiment:
     """Model an experiment that takes an Graph instance and an optimizer"""
-    start_time: float = 0.
-    solutions: List[Dict] = []
+    
+    def __init__(self) -> None:
+        self.start_time: float = 0.
+        self.solutions: List[Dict] = []
     
     def run(self, instance: Graph, optimizers: List[OptimizationProcedure]) -> None:
         self.start_time = perf_counter()

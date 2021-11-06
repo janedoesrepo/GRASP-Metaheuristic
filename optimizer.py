@@ -71,7 +71,7 @@ class StationOrientedStrategy(OptimizationProcedure):
             candidates = tasks_without_predecessors(candidate_list)
 
             # Condition 2: tasks fit into the current station
-            candidates =  [task for task in candidates if current_station.can_fit(task)]
+            candidates =  fitting_tasks(candidates, current_station)
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
@@ -80,12 +80,12 @@ class StationOrientedStrategy(OptimizationProcedure):
                 continue
 
             # order the list of station candidates
-            ordered_candidate_value_list = self.ordering_rule.order_tasks(
+            ordered_candidates = self.ordering_rule.order_tasks(
                 candidates, current_station
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            next_task = ordered_candidate_value_list[0]
+            next_task = ordered_candidates[0]
 
             # assign the chosen task to the current station and remove it from candidate list
             current_station.add_task(next_task)
@@ -128,15 +128,15 @@ class TaskOrientedStrategy(OptimizationProcedure):
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidate_tasks = tasks_without_predecessors(candidate_list)
+            candidates = tasks_without_predecessors(candidate_list)
 
-            # order the list of station candidates (TODO: what is the correct station argument?)
-            ordered_candidate_value_list = self.ordering_rule.order_tasks(
-                candidate_tasks, current_station
+            # order the list of station candidates
+            ordered_candidates = self.ordering_rule.order_tasks(
+                candidates, current_station
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            next_task = ordered_candidate_value_list[0]
+            next_task = ordered_candidates[0]
 
             # assign next task to first station it fits in
             for station in stations:
@@ -197,19 +197,19 @@ class GRASP(OptimizationProcedure):
             candidates = tasks_without_predecessors(candidate_list)
 
             # Condition 2: tasks fit into the current station
-            candidates =  [task for task in candidates if current_station.can_fit(task)]
+            candidates = fitting_tasks(candidates, current_station)
             
-            # If no candidates are found then open a new empty station
+            # if there are no candidates for the current station open a new empty station
             if not len(candidates):
                 stations.append(Station(cycle_time))
                 current_station = stations[-1]
                 continue
 
             # Find candidates that fulfill a threshold condition
-            candidates = restricted_candidates(candidates, current_station)        
+            restricted_candidates = restricted_candidates(candidates, current_station)        
 
             # next task to be sequenced is picked randomly from the restricted candidate list
-            next_task = random.choice(candidates)
+            next_task = random.choice(restricted_candidates)
 
             # assign the next task to the current station and remove it from candidate list
             current_station.add_task(next_task)
@@ -225,11 +225,15 @@ def tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
     """Returns a list of tasks that have no predecessors"""
     return [task for task in candidates if not len(task.predecessors)]
 
+def fitting_tasks(candidates: List[Task], station: Station) -> List[Task]:
+    """Returns a list of tasks that fit into the station"""
+    return [task for task in candidates if station.can_fit(task)]
 
 def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
     """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
-    [task.remove_predecessor(next_task) for task in candidate_list if next_task.is_predecessor(task)]
-
+    for task in candidate_list:
+        if next_task.is_predecessor(task):
+            task.remove_predecessor(next_task)
 
 def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]:
     """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
@@ -239,13 +243,11 @@ def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]
     else:
         return [1 / (current_station[-1].setup_time(task) + task.processing_time) for task in candidate_tasks]
     
-    
 def get_threshold(greedy_indices: List[float], alpha: float):
     gmin = min(greedy_indices)
     gmax = max(greedy_indices)
     return gmin + alpha * (gmax - gmin)
 
-    
 def restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
     # compute the greedy-Index g() for each candidate task
     greedy_indices = greedy(candidates, current_station)
@@ -255,7 +257,6 @@ def restricted_candidates(candidates: List[Task], current_station: Station, alph
     
     # Find candidates that pass the threshold condition
     return [task for task, greedy_index in zip(candidates, greedy_indices) if greedy_index <= threshold]
-
 
 def create_optimizers() -> List[OptimizationProcedure]:
     """Creates a list of all optimization procedures"""

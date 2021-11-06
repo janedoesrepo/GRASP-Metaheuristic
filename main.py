@@ -37,9 +37,10 @@ def run_experiments(instances: Generator[Graph, None, None], optimizers: List[Op
 
         experiment = Experiment()
         experiment.run(instance, optimizers)
-        Exporter.export_instance_result(experiment.solutions, filename=f"{instance}")    
         
         solutions.extend(experiment.solutions)
+        
+        Exporter.export_instance_result(experiment.solutions, filename=f"{instance}")    
 
         print("Experiment Runtime:", perf_counter() - experiment.start_time)
         print("=" * 50, "\n")
