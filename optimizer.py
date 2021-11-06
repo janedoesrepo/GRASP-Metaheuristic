@@ -3,7 +3,7 @@ import random
 from abc import ABC, abstractmethod
 from graph import Graph
 from local_search import improve_solution
-from rules import TaskOrderingRule
+from rule import TaskOrderingRule
 from station import Station
 from task import Task
 from typing import List

@@ -12,14 +12,17 @@ class Experiment:
     def run(self, instance: Graph, optimizers: List[OptimizationProcedure]) -> None:
         self.start_time = perf_counter()
         for optimizer in optimizers:
-            optimizer_start = perf_counter()
+            
+            optimizer_start_time = perf_counter()
+            
+            # Solve the instance using the optimizer
             stations = optimizer.solve(instance)
 
             self.solutions.append({
                 'Instance': f"{instance}",
                 'Strategy': f"{optimizer}",
                 'Num_Stations': len(stations),
-                "Runtime": perf_counter() - optimizer_start
+                "Runtime": perf_counter() - optimizer_start_time
                 #TODO: Add the Sequence for export
             })
         
