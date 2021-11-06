@@ -3,11 +3,10 @@ from dataclasses import dataclass, field
 from typing import List
 
 
-@dataclass(eq=False)
+@dataclass
 class Task:
-    
     id: int
-    processing_time: int = field(compare=False)
+    processing_time: int
     predecessors: List[int] = field(default_factory=list, init=False, repr=False, compare=False)
     setup_times: List[int]  = field(default_factory=list, init=False, repr=False, compare=False)
     
