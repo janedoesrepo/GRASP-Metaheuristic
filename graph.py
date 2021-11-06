@@ -5,16 +5,16 @@ from task import Task
 
 class Graph:
 
-    def __init__(self, tasks: List[Task], cycle_time: int, filename: str = "") -> None:
+    def __init__(self, tasks: List[Task], cycle_time: int, name: str = "") -> None:
         self.tasks = tasks
         self.cycle_time = cycle_time
-        self.filename = filename
+        self.name = name
 
     def __str__(self) -> str:
-        return f"{self.filename[:-4]}"
+        return f"{self.name}"
 
     @staticmethod
-    def parse_instance(filename: str) -> Graph:
+    def parse_instance(filepath: str) -> Graph:
         """Import-function for the data set of Martino and Pastor (2010)
         The data is available at https://www.assembly-line-balancing.de/sualbsp
 
@@ -26,7 +26,7 @@ class Graph:
         lines 4+n+p to 4+2n+p-1:    tsu; setup times
         """
 
-        with open("data/Instances/" + filename, "r") as file:
+        with open(filepath, "r") as file:
 
             # read first three lines
             num_tasks = int(file.readline())
@@ -49,6 +49,8 @@ class Graph:
                 setup_times_i = file.readline().split(",")
                 tasks[i].setup_times = list(map(int, setup_times_i))
         
-        print(f"*Import of {filename} successful!*")
+        print(f"*Import of {filepath} successful!*")
+        
+        name = filepath.split('/')[-1][:-4]
 
-        return Graph(tasks, cycle_time, filename)
+        return Graph(tasks, cycle_time, name)

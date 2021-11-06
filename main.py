@@ -8,7 +8,8 @@ from typing import Dict, List, Generator
 
 def create_instances(quantity: int = 10) -> Generator[Graph, None, None]:
     """Creates up to 10 instances of all possible combinations of graph and variant"""
-
+    assert (1 <= quantity <= 10), f"The maxixum number of instances per Graph is 10, got {quantity}."
+    
     graphs = [
         # "ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2",
         "MITCHELL.IN2",
@@ -16,7 +17,7 @@ def create_instances(quantity: int = 10) -> Generator[Graph, None, None]:
     ]
     variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
     instances = (
-        Graph.parse_instance(f"{graph}_{variant}_EJ{ident}.txt")
+        Graph.parse_instance(f"data/Instances/{graph}_{variant}_EJ{ident}.txt")
         for graph in graphs
         for variant in variants
         for ident in range(1, quantity + 1)
@@ -47,7 +48,10 @@ def run_experiments(instances: Generator[Graph, None, None], optimizers: List[Op
     return solutions
 
 
-def main(num_instances: int):
+def main():
+    
+    # Define the number of instances per Graph in range(1,11)
+    num_instances = 11
 
     # Create instances and optimization procedures
     instances = create_instances(quantity=num_instances)
@@ -61,4 +65,4 @@ def main(num_instances: int):
 
 
 if __name__ == "__main__":
-    main(1)
+    main()
