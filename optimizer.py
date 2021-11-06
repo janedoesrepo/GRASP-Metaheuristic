@@ -85,7 +85,7 @@ class StationOrientedStrategy(OptimizationProcedure):
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            next_task = ordered_candidate_value_list[0][0]
+            next_task = ordered_candidate_value_list[0]
 
             # assign the chosen task to the current station and remove it from candidate list
             current_station.append(next_task)
@@ -136,7 +136,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            next_task = ordered_candidate_value_list[0][0]
+            next_task = ordered_candidate_value_list[0]
 
             # assign next task to first station it fits in
             for station in stations:
