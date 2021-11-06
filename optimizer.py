@@ -88,7 +88,7 @@ class StationOrientedStrategy(OptimizationProcedure):
             next_task = ordered_candidate_value_list[0]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.append(next_task)
+            current_station.add_task(next_task)
             candidate_list.remove(next_task)
 
             # Remove the chosen task as a predecessor from all other candidates
@@ -150,7 +150,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
                 current_station = stations[-1]
 
             # assign the chosen task to the current station and remove it from candidate list
-            current_station.append(next_task)
+            current_station.add_task(next_task)
             candidate_list.remove(next_task)
 
             # Remove the chosen task as a predecessor from all other candidates
@@ -212,7 +212,7 @@ class GRASP(OptimizationProcedure):
             next_task = random.choice(candidates)
 
             # assign the next task to the current station and remove it from candidate list
-            current_station.append(next_task)
+            current_station.add_task(next_task)
             candidate_list.remove(next_task)
 
             # Remove the next task as a predecessor from all other candidates

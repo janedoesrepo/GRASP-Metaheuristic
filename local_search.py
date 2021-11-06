@@ -14,11 +14,11 @@ def reassemble(sequence: List[Task], cycle_time: int) -> List[Station]:
 
     for task in sequence:
         if current_station.can_fit(task):
-            current_station.append(task)
+            current_station.add_task(task)
         else:
             solution.append(Station(cycle_time))
             current_station = solution[-1]
-            current_station.append(task)
+            current_station.add_task(task)
 
     return solution
 
