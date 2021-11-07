@@ -50,19 +50,25 @@ def get_objective_functions(probability_threshold: float) -> Tuple[Callable, Cal
     else:
         return imbalanced_objective, imbalanced_variation
 
+def swap_tasks(sequence: List[Task], pos1: int, pos2: int) -> List[Task]:
+    """Returns a new sequence with the position of two tasks swapped"""
+    new_sequence = sequence.copy()
+    new_sequence[pos2] = sequence[pos1]
+    new_sequence[pos1] = sequence[pos2]
+    return new_sequence
 
 def improve_solution(solution: List[Station], cycle_time: int, probability_threshold: float = 0.75) -> List[Station]:
     """Try to improve a solution by exchanging the position of tasks"""
 
     # create a flattened version of the solution
-    solution_sequence = [task for station in solution for task in station]
+    solution_sequence: List[Task] = [task for station in solution for task in station]
     num_tasks = len(solution_sequence)
 
     current_sequence = solution_sequence.copy()
 
     while True:
-
-        feasible_exchanges = {}
+        # Container for valid solutions
+        valid_solutions = []
 
         # Randomly choose the objective functions
         calculate_objective, calculate_variation = get_objective_functions(probability_threshold)
@@ -70,66 +76,50 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
         # initialise current solution
         current_solution = reassemble(current_sequence, cycle_time)
         current_solution_value = calculate_objective(current_solution)
-        current_solution_m = len(current_solution)
+        num_stations_current = len(current_solution)
 
         """Iterate over all tasks but the last one and check
         if an exchange with a task on the right is feasible"""
-        for i, left_task in enumerate(current_sequence):
+        for i in range(num_tasks-1):
 
             for j in range(i + 1, num_tasks):
                 right_task = current_sequence[j]
 
-                """Checks for feasability of the exchange"""
-                if left_task.is_predecessor(right_task):
-                    # exchange with the right task and all tasks >j unfeasible
-                    # we do not need to check any of them. -> escape j-loop
+                # The exchange is feasible if right_task has no predecessors on his left in the sequence
+                if any(left_task.is_predecessor(right_task) for left_task in current_sequence[i:j]):
                     break
 
-                # check if any task between the both is a predecessor of the right task
-                for middle_task in current_sequence[i + 1 : j]:
-                    if middle_task.is_predecessor(right_task):
-                        # exchange with the right task unfeasible. -> increment j
-                        break
-
-                else:
-                    """The exchange itself"""
-                    modified_sequence = current_sequence.copy()
-                    modified_sequence[i] = right_task
-                    modified_sequence[j] = left_task
-                    modified_solution = reassemble(modified_sequence, cycle_time)
-
-                    # add indices of task left and right to the dict of feasible exchanges
-                    # and save the objective function value f() and the number of stations
-                    mod_sol_value = calculate_objective(modified_solution)
-
-                    feasible_exchanges[(i, j)] = {
-                        "m": len(modified_solution),
-                        "var": calculate_variation(mod_sol_value, current_solution_value),
-                        "seq": modified_sequence.copy(),
-                    }
+                # Exchange the tasks and reassemble the modified sequence
+                modified_sequence = swap_tasks(current_sequence, i, j)
+                modified_solution = reassemble(modified_sequence, cycle_time)
+                
+                # Save the modified sequence if at least as good than the current one
+                num_stations_modified = len(modified_solution)
+                if num_stations_modified <= num_stations_current:
+                    modified_solution_value = calculate_objective(modified_solution)
+                    variation = calculate_variation(modified_solution_value, current_solution_value)
+                    
+                    valid_solutions.append(
+                        (num_stations_modified, variation, (i,j))
+                    )
 
         """Find the best of all exchanges"""
-        # create list of modified solutions that have as many or less stations than the current solution
-        valid_solutions = [
-            (solution["m"], solution["var"], indices)
-            for (indices, solution) in feasible_exchanges.items()
-            if solution["m"] <= current_solution_m
-        ]
 
         # get best value in order min(m), min(var), min(key)
         best_exchange = min(valid_solutions)
         best_exchange_m = best_exchange[0]
         best_exchange_variation = best_exchange[1]
-        best_exchange_indicies = best_exchange[2]
+        i, j = best_exchange[2]
 
         # is best_exchange better than current_solution?
-        if best_exchange_m < current_solution_m:
+        if best_exchange_m < num_stations_current:
             # because it has fewer stations
-            current_sequence = feasible_exchanges[best_exchange_indicies]["seq"][:]
+            current_sequence = swap_tasks(current_sequence, i, j)
         elif best_exchange_variation < 0:
             # because it has positive variation
-            current_sequence = feasible_exchanges[best_exchange_indicies]["seq"][:]
+            current_sequence = swap_tasks(current_sequence, i, j)
         else:
+            # Current sequence can't be improved -> end while-loop
             break
 
     improved_solution = reassemble(current_sequence, cycle_time)

@@ -206,7 +206,7 @@ class GRASP(OptimizationProcedure):
                 continue
 
             # Find candidates that fulfill a threshold condition
-            restricted_candidates = restricted_candidates(candidates, current_station)        
+            restricted_candidates = get_restricted_candidates(candidates, current_station)        
 
             # next task to be sequenced is picked randomly from the restricted candidate list
             next_task = random.choice(restricted_candidates)
@@ -248,7 +248,7 @@ def get_threshold(greedy_indices: List[float], alpha: float):
     gmax = max(greedy_indices)
     return gmin + alpha * (gmax - gmin)
 
-def restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
+def get_restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
     # compute the greedy-Index g() for each candidate task
     greedy_indices = greedy(candidates, current_station)
 
