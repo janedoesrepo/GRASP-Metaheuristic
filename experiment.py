@@ -8,11 +8,9 @@ class Experiment:
     """Model an experiment that takes an Graph instance and an optimizer"""
     
     def __init__(self) -> None:
-        self.start_time: float = 0.
         self.solutions: List[Dict] = []
     
     def run(self, instance: Graph, optimizers: List[OptimizationProcedure]) -> None:
-        self.start_time = perf_counter()
         for optimizer in optimizers:
             
             optimizer_start_time = perf_counter()

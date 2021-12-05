@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import Generator, List
 from task import Task
 
 
@@ -33,20 +33,20 @@ class Graph:
             num_relations = int(file.readline())
             cycle_time = int(file.readline())
 
-            # Create tasks with id and processing times
-            tasks = []
+            # Create Tasks with id and processing times
+            tasks: List[Task] = []
             for _ in range(num_tasks):
-                task_id, time = file.readline().split(",")
-                tasks.append(Task(int(task_id), int(time)))
+                task_id, processing_time = file.readline().split(',')
+                tasks.append(Task(int(task_id), int(processing_time)))
 
-            # Add the ids of its predecessor to each task
+            # Add the ids of the predecessor to each Task
             for _ in range(num_relations):
-                predecessor, task_id = file.readline().split(",")
-                tasks[int(task_id)].predecessors.append(int(predecessor))
+                predecessor_id, successor_id = file.readline().split(',')
+                tasks[int(successor_id)].predecessors.append(int(predecessor_id))
 
-            # Setup times is a matrice of dim num_tasks x num_tasks
+            # Add the setup times from one Task to all other Tasks
             for i in range(num_tasks):
-                setup_times_i = file.readline().split(",")
+                setup_times_i = file.readline().split(',')
                 tasks[i].setup_times = list(map(int, setup_times_i))
         
         print(f"*Import of {filepath} successful!*")
@@ -54,3 +54,23 @@ class Graph:
         name = filepath.split('/')[-1][:-4]
 
         return Graph(tasks, cycle_time, name)
+    
+    @staticmethod
+    def from_IN2(data_dir: str, graphs: List[str] = None, variants: List[str] = None, quantity: int = 10) -> Generator[Graph, None, None]:
+        """Creates up to 10 instances of all possible combinations of graph and variant"""
+        assert (1 <= quantity <= 10), f"The maximum number of instances per Graph and variation is 10, got {quantity}."
+        
+        if graphs is None:
+            graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2", "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
+            
+        if variants is None:
+            variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
+            
+        instances = (
+            Graph.parse_instance(f"{data_dir}/{graph}_{variant}_EJ{ident}.txt")
+            for graph in graphs
+            for variant in variants
+            for ident in range(1, quantity + 1)
+        )
+
+        return instances
