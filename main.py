@@ -36,7 +36,7 @@ def main():
     graphs = ["MITCHELL.IN2"]
 
     # Create instances and optimization procedures
-    instances = Graph.create_instances(data_dir, graphs=graphs, quantity=num_instances)
+    instances = Graph.from_IN2(data_dir, graphs=graphs, quantity=num_instances)
     optimizers = create_optimizers()
 
     # run experiments
