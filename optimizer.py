@@ -5,7 +5,7 @@ from graph import Graph
 from local_search import improve_solution
 from rule import TaskOrderingRule
 from station import Station
-from task import Task
+from tasklist import TaskList
 from typing import List
 
 
@@ -38,7 +38,7 @@ class OptimizationProcedure(ABC):
         pass
     
     @abstractmethod
-    def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
+    def construct_solution(self, candidate_list: TaskList, cycle_time: int) -> List[Station]:
         pass
 
     def __str__(self):
@@ -55,23 +55,23 @@ class StationOrientedStrategy(OptimizationProcedure):
     def solve(self, instance: Graph) -> List[Station]:
        
         print(f"Applying {self} with {self.ordering_rule}")
-        candidate_list = copy.deepcopy(instance.tasks)
-        solution = self.construct_solution(candidate_list, instance.cycle_time)
+        task_list = TaskList(copy.deepcopy(instance.tasks))
+        solution = self.construct_solution(task_list, instance.cycle_time)
         return solution
     
-    def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
+    def construct_solution(self, task_list: TaskList, cycle_time: int) -> List[Station]:
 
         # initialize stations
         stations: List[Station] = [Station(cycle_time)]
         current_station = stations[-1]
 
-        while len(candidate_list):
+        while len(task_list):
 
             # Condition 1: tasks have no precedence relations
-            candidates = tasks_without_predecessors(candidate_list)
+            candidates = task_list.without_predecessors()
 
             # Condition 2: tasks fit into the current station
-            candidates =  fitting_tasks(candidates, current_station)
+            candidates = candidates.that_fit(current_station)
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
@@ -89,10 +89,10 @@ class StationOrientedStrategy(OptimizationProcedure):
 
             # assign the chosen task to the current station and remove it from candidate list
             current_station.add_task(next_task)
-            candidate_list.remove(next_task)
+            task_list.remove(next_task)
 
             # Remove the chosen task as a predecessor from all other candidates
-            remove_from_predecessors(next_task, candidate_list)
+            task_list.remove_from_predecessors(next_task)
 
         return stations
 
@@ -106,7 +106,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
     of the workstations remain open until all of the tasks have been assigned, at which point
     the procedure ends. [Martino & Pastor (2010), 3.3]
 
-    TODO: Procedure is not working correctly. How should the tasks be ordered if there are
+    TODO: Procedure seems to not be working correctly. How should the tasks be ordered if there are
     multiple stations they could be assigned to and the setup may change the ordering?"""
 
     def __init__(self, ordering_rule: TaskOrderingRule):
@@ -115,20 +115,20 @@ class TaskOrientedStrategy(OptimizationProcedure):
     def solve(self, instance: Graph) -> List[Station]:
        
         print(f"Applying {self} with {self.ordering_rule}")
-        candidate_list = copy.deepcopy(instance.tasks)
-        solution = self.construct_solution(candidate_list, instance.cycle_time)
+        task_list = TaskList(copy.deepcopy(instance.tasks))
+        solution = self.construct_solution(task_list, instance.cycle_time)
         return solution
 
-    def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
+    def construct_solution(self, task_list: TaskList, cycle_time: int) -> List[Station]:
 
         # initialize stations
         stations: List[Station] = [Station(cycle_time)]
         current_station = stations[-1]
 
-        while len(candidate_list):
+        while len(task_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidates = tasks_without_predecessors(candidate_list)
+            candidates = task_list.without_predecessors()
 
             # order the list of station candidates
             ordered_candidates = self.ordering_rule.order_tasks(
@@ -151,10 +151,10 @@ class TaskOrientedStrategy(OptimizationProcedure):
 
             # assign the chosen task to the current station and remove it from candidate list
             current_station.add_task(next_task)
-            candidate_list.remove(next_task)
+            task_list.remove(next_task)
 
             # Remove the chosen task as a predecessor from all other candidates
-            remove_from_predecessors(next_task, candidate_list)
+            task_list.remove_from_predecessors(next_task)
 
         return stations
 
@@ -165,14 +165,12 @@ class GRASP(OptimizationProcedure):
     def __init__(self, num_iter: int):
         self.num_iter = num_iter
     
-    def solve(self, instance: Graph) -> List[Station]:
-          
+    def solve(self, instance: Graph) -> List[Station]:         
         print(f"Applying GRASP-{self.num_iter} Metaheuristic")
     
         for iteration in range(1, self.num_iter + 1):
-            
             # get a mutable copy of the original task list
-            candidate_list = copy.deepcopy(instance.tasks)
+            candidate_list = TaskList(copy.deepcopy(instance.tasks))
             
             solution = self.construct_solution(candidate_list, instance.cycle_time)
             improved_solution = improve_solution(solution, instance.cycle_time)
@@ -185,8 +183,8 @@ class GRASP(OptimizationProcedure):
 
         return best_solution
     
-    def construct_solution(self, candidate_list: List[Task], cycle_time: int) -> List[Station]:
-
+    def construct_solution(self, candidate_list: TaskList, cycle_time: int) -> List[Station]:
+        """TODO: self is never used"""
         # Initialise solution with one empty station
         stations = [Station(cycle_time)]
         current_station = stations[-1]
@@ -194,10 +192,10 @@ class GRASP(OptimizationProcedure):
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidates = tasks_without_predecessors(candidate_list)
+            candidates = candidate_list.without_predecessors()
 
             # Condition 2: tasks fit into the current station
-            candidates = fitting_tasks(candidates, current_station)
+            candidates = candidates.that_fit(current_station)
             
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
@@ -206,7 +204,7 @@ class GRASP(OptimizationProcedure):
                 continue
 
             # Find candidates that fulfill a threshold condition
-            restricted_candidates = get_restricted_candidates(candidates, current_station)        
+            restricted_candidates = candidates.restricted_candidates(current_station)        
 
             # next task to be sequenced is picked randomly from the restricted candidate list
             next_task = random.choice(restricted_candidates)
@@ -216,47 +214,9 @@ class GRASP(OptimizationProcedure):
             candidate_list.remove(next_task)
 
             # Remove the next task as a predecessor from all other candidates
-            remove_from_predecessors(next_task, candidate_list)
+            candidate_list.remove_from_predecessors(next_task)
 
         return stations
-
-
-def tasks_without_predecessors(candidates: List[Task]) -> List[Task]:
-    """Returns a list of tasks that have no predecessors"""
-    return [task for task in candidates if not len(task.predecessors)]
-
-def fitting_tasks(candidates: List[Task], station: Station) -> List[Task]:
-    """Returns a list of tasks that fit into the station"""
-    return [task for task in candidates if station.can_fit(task)]
-
-def remove_from_predecessors(next_task: Task, candidate_list: List[Task]) -> None:
-    """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
-    for task in candidate_list:
-        if next_task.is_predecessor(task):
-            task.remove_predecessor(next_task)
-
-def greedy(candidate_tasks: List[Task], current_station: Station) -> List[float]:
-    """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
-
-    if current_station.empty():
-        return [1 / task.processing_time for task in candidate_tasks]
-    else:
-        return [1 / (current_station[-1].setup_time(task) + task.processing_time) for task in candidate_tasks]
-    
-def get_threshold(greedy_indices: List[float], alpha: float):
-    gmin = min(greedy_indices)
-    gmax = max(greedy_indices)
-    return gmin + alpha * (gmax - gmin)
-
-def get_restricted_candidates(candidates: List[Task], current_station: Station, alpha: float = 0.3):
-    # compute the greedy-Index g() for each candidate task
-    greedy_indices = greedy(candidates, current_station)
-
-    # Compute threshold function
-    threshold = get_threshold(greedy_indices, alpha)
-    
-    # Find candidates that pass the threshold condition
-    return [task for task, greedy_index in zip(candidates, greedy_indices) if greedy_index <= threshold]
 
 def create_optimizers() -> List[OptimizationProcedure]:
     """Creates a list of all optimization procedures"""
