@@ -2,6 +2,7 @@ import statistics
 from abc import ABC, abstractmethod
 from station import Station
 from task import Task
+from tasklist import TaskList
 from typing import List, Tuple
 
 
@@ -9,7 +10,7 @@ class TaskOrderingRule(ABC):
     """Abstract class that decsribes a rule by which a list of tasks should be ordered."""
 
     @abstractmethod
-    def order_tasks(self, candidates: List[Task], station: Station) -> List[Task]:
+    def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
         pass
 
     def __str__(self):
@@ -19,40 +20,40 @@ class TaskOrderingRule(ABC):
 class MaxTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time descending"""
 
-    def order_tasks(self, candidates: List[Task], station: Station) -> List[Task]:
+    def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
         tasks_values = setups_plus_processing(candidates, station)
         tasks_values_sorted = sorted(tasks_values, key=lambda x: x[1], reverse=True)
-        return [task for task, _ in tasks_values_sorted]
+        return TaskList([task for task, _ in tasks_values_sorted])
 
 
 class MinTSOrdering(TaskOrderingRule):
     """Orders tasks by processing time plus setup time ascending"""
 
-    def order_tasks(self, candidates: List[Task], station: Station) -> List[Task]:
+    def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
         tasks_values = setups_plus_processing(candidates, station)
         tasks_values_sorted = sorted(tasks_values, key=lambda x: x[1])
-        return [task for task, _ in tasks_values_sorted] 
+        return TaskList([task for task, _ in tasks_values_sorted])
 
 
 class MaxSOrdering(TaskOrderingRule):
     """Orders tasks by setup time descending"""
 
-    def order_tasks(self, candidates: List[Task], station: Station) -> List[Task]:
+    def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
         tasks_values = setups_only(candidates, station)
         tasks_values_sorted = sorted(tasks_values, key=lambda x: x[1], reverse=True)
-        return [task for task, _ in tasks_values_sorted] 
+        return TaskList([task for task, _ in tasks_values_sorted]) 
 
 
 class MinSOrdering(TaskOrderingRule):
     """Orders tasks by setup time ascending"""
 
-    def order_tasks(self, candidates: List[Task], station: Station) -> List[Task]:
+    def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
         tasks_values = setups_only(candidates, station)
         tasks_values_sorted = sorted(tasks_values, key=lambda x: x[1])
-        return [task for task, _ in tasks_values_sorted] 
+        return TaskList([task for task, _ in tasks_values_sorted])
 
 
-def setups_plus_processing(candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
+def setups_plus_processing(candidates: TaskList, station: Station) -> List[Tuple[Task, float]]:
     """Return a tuple for each task in the candidate_list and its processing incl. setup time) """
     
     if station.empty():
@@ -61,7 +62,7 @@ def setups_plus_processing(candidates: List[Task], station: Station) -> List[Tup
         return [(task, station[-1].setup_time(task) + task.processing_time) for task in candidates]
 
 
-def setups_only(candidates: List[Task], station: Station) -> List[Tuple[Task, float]]:
+def setups_only(candidates: TaskList, station: Station) -> List[Tuple[Task, float]]:
     """Return a tuple for each task in the candidate_list and its setup time """
     
     if station.empty():

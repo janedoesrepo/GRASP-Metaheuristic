@@ -1,6 +1,6 @@
 import copy
 import random
-from sequence import TaskSequence
+from tasklist import TaskList
 from station import Station
 from typing import Callable, List, Tuple
 
@@ -13,13 +13,13 @@ def imbalanced_objective(solution: List[Station], eps: float = 0.001) -> float:
     """MAXIMIZE the objective to create solutions with an imbalanced workload"""
     return sum( pow(station.cycle_time - station.station_time + eps, -1) for station in solution)
 
-def balanced_variation(x: float, y: float) -> float:
+def balanced_variation(objective1: float, objective2: float) -> float:
     """Calculate the difference in the objective value of two solutions"""
-    return x - y
+    return objective1 - objective2
 
-def imbalanced_variation(x: float, y: float) -> float:
+def imbalanced_variation(objective1: float, objective2: float) -> float:
     """Calculate the difference in the objective value of two solutions"""
-    return y - x
+    return objective2 - objective1
 
 def get_objective_functions(probability_threshold: float) -> Tuple[Callable, Callable]:
     """Returns two objective functions based on a random behaviour."""
@@ -32,7 +32,7 @@ def improve_solution(solution: List[Station], cycle_time: int, probability_thres
     """Try to improve a solution by exchanging the position of tasks"""
 
     # create a flattened version of the solution
-    solution_sequence = TaskSequence.from_solution(solution)
+    solution_sequence = TaskList.from_solution(solution)
     num_tasks = len(solution_sequence)
 
     current_sequence = copy.copy(solution_sequence)
