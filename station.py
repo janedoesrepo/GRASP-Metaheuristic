@@ -14,7 +14,8 @@ class Station(Sequence):
         """Return the task at index of the Stations task list"""
         return self.task_list[key]
     
-    def __len__(self):
+    def __len__(self) -> int:
+        """Returns the numer of tasks in the Station"""
         return len(self.task_list)
         
     def empty(self) -> bool:
