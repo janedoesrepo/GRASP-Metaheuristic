@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Generator, List
+from config import GraphConfig
 from task import Task
 
 
@@ -56,21 +57,26 @@ class Graph:
         return Graph(tasks, cycle_time, name)
     
     @staticmethod
-    def from_IN2(data_dir: str, graphs: List[str] = None, variants: List[str] = None, quantity: int = 10) -> Generator[Graph, None, None]:
-        """Creates up to 10 instances of all possible combinations of graph and variant"""
-        assert (1 <= quantity <= 10), f"The maximum number of instances per Graph and variation is 10, got {quantity}."
+    def from_IN2(config: GraphConfig) -> Generator[Graph, None, None]:
+        """
+        Creates up to 10 instances of all possible combinations of graph and variant
+        """
+        num_instances = config.num_instances
+        assert (1 <= num_instances <= 10), f"The maximum number of instances per Graph and variation is 10, got {num_instances}."
         
-        if graphs is None:
-            graphs = ["ARC83.IN2", "BARTHOLD.IN2", "HESKIA.IN2", "LUTZ2.IN2", "MITCHELL.IN2", "ROSZIEG.IN2", "SAWYER30.IN2", "WEE-MAG.IN2"]
-            
-        if variants is None:
-            variants = ["TS0.25", "TS0.25-med", "TS0.75", "TS0.75-med"]
+        with open(config.graphs_file, encoding="utf8") as f:
+            graphs = [line.rstrip() for line in f.readlines()]
+            print(f"Using graphs from {config.graphs_file}: {graphs}")
+        
+        with open(config.variants_file, encoding="utf8") as f:
+            variants = [line.rstrip() for line in f.readlines()] 
+            print(f"Using variants: {variants}\n")
             
         instances = (
-            Graph.parse_instance(f"{data_dir}/{graph}_{variant}_EJ{ident}.txt")
+            Graph.parse_instance(f"{config.data_dir}/{graph}_{variant}_EJ{ident}.txt")
             for graph in graphs
             for variant in variants
-            for ident in range(1, quantity + 1)
+            for ident in range(1, num_instances + 1)
         )
 
         return instances

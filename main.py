@@ -1,3 +1,4 @@
+from config import read_config
 from exporter import Exporter
 from experiment import Experiment
 from graph import Graph
@@ -29,21 +30,18 @@ def run_experiments(instances: Generator[Graph, None, None], optimizers: List[Op
 
 def main():
     
-    data_dir = 'data/Instances'
-    
-    # Define the number of instances per Graph in range(1,11)
-    num_instances = 1
-    graphs = ["MITCHELL.IN2"]
+    # read the configuration settings from a JSON file
+    config = read_config("./config.json")
 
     # Create instances and optimization procedures
-    instances = Graph.from_IN2(data_dir, graphs=graphs, quantity=num_instances)
+    instances = Graph.from_IN2(config)
     optimizers = create_optimizers()
 
     # run experiments
     results = run_experiments(instances, optimizers)
 
     # save experiments to disc
-    Exporter.export_results(results, filename='all_results')
+    Exporter.export_results(results, file_path=config.all_results_file)
 
 if __name__ == "__main__":
     main()
