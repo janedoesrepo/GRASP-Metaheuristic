@@ -1,3 +1,5 @@
+[![PyTest](https://github.com/janedoesrepo/GRASP-Metaheuristic/actions/workflows/tests.yml/badge.svg)](https://github.com/janedoesrepo/GRASP-Metaheuristic/actions/workflows/tests.yml)
+
 # SUABLPS Solver
 
 A solver package for the sequence-dependent assembly line balancing and scheduling problem.
