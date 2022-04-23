@@ -20,4 +20,4 @@ jobs:
           pip install pytest pytest-cov
 
       - name: Run test suite
-        run: pytest --cov=sualbsp_solver /tests
+        run: pytest
