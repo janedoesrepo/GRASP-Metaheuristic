@@ -2,11 +2,14 @@ import csv
 import pathlib
 from typing import Dict, List
 
+
 class Exporter:
     
     @staticmethod
     def _write_csv(filepath, solutions: List[Dict]) -> None:
-        """Exports solutions to csv"""
+        """Exports solutions to csv
+        TODO: probably fits better outside of the class. The other methods can then be static.
+        """
         
         with open(filepath, 'w', newline='') as csvfile:
             
@@ -18,11 +21,11 @@ class Exporter:
                 writer.writerow(solution)
             
     @classmethod
-    def export_results(cls, solutions: List[Dict], filename: str) -> None:
+    def export_results(cls, solutions: List[Dict], file_path: str) -> None:
         """Export all results to a single csv-file"""
         
         # Set filepath
-        filepath = f'results/{filename}.csv'
+        filepath = f'{file_path}.csv'
         
         cls._write_csv(filepath, solutions)
 
