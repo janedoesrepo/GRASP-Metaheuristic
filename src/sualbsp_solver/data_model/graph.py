@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from typing import Generator, List
 
-from config import GraphConfig
-
-from data_model.task import Task
+from sualbsp_solver.config import GraphConfig
+from sualbsp_solver.data_model.task import Task
 
 
 class Graph:

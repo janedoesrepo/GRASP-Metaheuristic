@@ -3,10 +3,9 @@ import random
 from abc import ABC, abstractmethod
 from typing import List
 
-from data_model import Graph, Station, TaskList
-
-from solver.local_search import improve_solution
-from solver.rule import TaskOrderingRule
+from sualbsp_solver.data_model import Graph, Station, TaskList
+from sualbsp_solver.solver.local_search import improve_solution
+from sualbsp_solver.solver.rule import TaskOrderingRule
 
 
 class OptimizationProcedure(ABC):

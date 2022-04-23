@@ -2,7 +2,7 @@ import statistics
 from abc import ABC, abstractmethod
 from typing import List, Tuple
 
-from data_model import Station, Task, TaskList
+from sualbsp_solver.data_model import Station, Task, TaskList
 
 
 class TaskOrderingRule(ABC):

@@ -1,8 +1,8 @@
 from time import perf_counter
 from typing import Dict, List
 
-from data_model import Graph
-from solver import OptimizationProcedure
+from sualbsp_solver.data_model import Graph
+from sualbsp_solver.solver import OptimizationProcedure
 
 
 class Experiment:

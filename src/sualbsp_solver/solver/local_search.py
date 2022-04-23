@@ -2,7 +2,7 @@ import copy
 import random
 from typing import Callable, List, Tuple
 
-from data_model import Station, TaskList
+from sualbsp_solver.data_model import Station, TaskList
 
 
 def balanced_objective(solution: List[Station]) -> float:

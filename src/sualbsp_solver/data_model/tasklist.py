@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List
 
-from data_model.station import Station
-from data_model.task import Task
+from sualbsp_solver.data_model.station import Station
+from sualbsp_solver.data_model.task import Task
 
 
 @dataclass
 class TaskList(Sequence):
-    task_list: List[Task]
+    task_list: List[Task] = field(default_factory=list)
     
     def __getitem__(self, index: int | slice) -> Task | TaskList:
         """Returns the task at index from the list. For slice a new TaskList is returned."""

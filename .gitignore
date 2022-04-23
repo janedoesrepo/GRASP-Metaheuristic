@@ -1,9 +1,10 @@
-data/SUALBSP-Instances_Capacho-and-Pastor_2008/Instances/*.txt
-data/SUALBSP-Instances_Capacho-and-Pastor_2008/README.doc
-results/
+src/data/SUALBSP-Instances_Capacho-and-Pastor_2008/Instances/*.txt
+src/data/SUALBSP-Instances_Capacho-and-Pastor_2008/README.doc
+src/results/
 
-# Pycharm
+# IDE
 .idea/
+.vscode/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

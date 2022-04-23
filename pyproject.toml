@@ -1,0 +1,42 @@
+[tool.poetry]
+name = "sualbps-solver"
+version = "0.1.0"
+description = "Solver for the sequence-dependent assembly-line balancing and scheduling problem (SUALBPS)"
+authors = ["Jan Niklas Engel <engeljanniklas@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.dev-dependencies]
+black = "^22.3.0"
+flake8 = "^4.0.1"
+pytest = "^7.1.2"
+pytest-cov = "^3.0.0"
+mypy = "^0.942"
+
+[tool.flake8]
+max-line-length = 160
+
+[tool.mypy]
+mypy_path = "src"
+check_untyped_defs = true
+disallow_any_generics = true
+ignore_missing_imports = true
+no_implicit_optional = true
+show_error_codes=true
+strict_equality = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+warn_unused_configs = true
+no_implicit_reexport = true
+
+[tool.pytest.ini_options]
+addopts = "--cov=sualbsp"
+testpaths = [
+    "tests",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

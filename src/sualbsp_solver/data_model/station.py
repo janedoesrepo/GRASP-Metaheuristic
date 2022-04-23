@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import List
 
-from data_model.task import Task
+from sualbsp_solver.data_model.task import Task
 
 
 @dataclass(eq=False)

@@ -1,11 +1,11 @@
 from time import perf_counter
 from typing import Dict, Generator, List
 
-from config import GraphConfig
-from data_model import Graph
-from experiment import Experiment
-from exporter import Exporter
-from solver import OptimizationProcedure, create_optimizers
+from sualbsp_solver.config import GraphConfig
+from sualbsp_solver.data_model import Graph
+from sualbsp_solver.experiment import Experiment
+from sualbsp_solver.exporter import Exporter
+from sualbsp_solver.solver import OptimizationProcedure, create_optimizers
 
 
 def run_experiments(instances: Generator[Graph, None, None], optimizers: List[OptimizationProcedure]) -> List[Dict]:
@@ -46,4 +46,4 @@ def main(config_path: str) -> None:
     Exporter.export_results(results, config.all_results_file)
 
 if __name__ == "__main__":
-    main(config_path="./sualbsp_solver/config/config.json")
+    main(config_path="./src/sualbsp_solver/config/config.json")
