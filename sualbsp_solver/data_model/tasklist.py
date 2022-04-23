@@ -12,8 +12,8 @@ from data_model.task import Task
 class TaskList(Sequence):
     task_list: List[Task]
     
-    def __getitem__(self, index):
-        """Returns the task at index from the list"""
+    def __getitem__(self, index: int | slice) -> Task | TaskList:
+        """Returns the task at index from the list. For slice a new TaskList is returned."""
         if isinstance(index, int):
             return self.task_list[index]
         elif isinstance(index, slice):
@@ -93,3 +93,7 @@ class TaskList(Sequence):
         """Returns a new TaskSequence created from a list of Stations"""
         return TaskList([task for station in solution for task in station])
     
+    @property
+    def first(self) -> Task:
+        """Returns the Task at index 0 from the TaskList."""
+        return self.task_list[0]

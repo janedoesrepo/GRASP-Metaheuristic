@@ -34,14 +34,14 @@ class OptimizationProcedure(ABC):
     """
 
     @abstractmethod
-    def solve(self, instance: Graph):
+    def solve(self, instance: Graph) -> List[Station]:
         pass
     
     @abstractmethod
     def construct_solution(self, candidate_list: TaskList, cycle_time: int) -> List[Station]:
         pass
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.__class__.__name__
 
 
@@ -49,7 +49,7 @@ class StationOrientedStrategy(OptimizationProcedure):
     """The candidate tasks will be assigned to the current station if processing the task
     does not exceed the instances cycle time. Otherwise a new station is opened."""
 
-    def __init__(self, ordering_rule: TaskOrderingRule):
+    def __init__(self, ordering_rule: TaskOrderingRule) -> None:
         self.ordering_rule = ordering_rule
 
     def solve(self, instance: Graph) -> List[Station]:
@@ -109,7 +109,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
     TODO: Procedure seems to not be working correctly. How should the tasks be ordered if there are
     multiple stations they could be assigned to and the setup may change the ordering?"""
 
-    def __init__(self, ordering_rule: TaskOrderingRule):
+    def __init__(self, ordering_rule: TaskOrderingRule) -> None:
         self.ordering_rule = ordering_rule
     
     def solve(self, instance: Graph) -> List[Station]:
@@ -136,7 +136,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
             )
 
             # next task to be sequenced is first in the ordered list of candidates
-            next_task = ordered_candidates[0]
+            next_task = ordered_candidates.first
 
             # assign next task to first station it fits in
             for station in stations:
@@ -162,12 +162,13 @@ class TaskOrientedStrategy(OptimizationProcedure):
 class GRASP(OptimizationProcedure):
     """TODO Docstring"""
     
-    def __init__(self, num_iter: int):
+    def __init__(self, num_iter: int) -> None:
         self.num_iter = num_iter
     
     def solve(self, instance: Graph) -> List[Station]:         
         print(f"Applying GRASP-{self.num_iter} Metaheuristic")
-    
+
+        best_solution: List[Station] = []
         for iteration in range(1, self.num_iter + 1):
             # get a mutable copy of the original task list
             candidate_list = TaskList(copy.deepcopy(instance.tasks))
