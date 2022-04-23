@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "sualbps-solver"
+name = "sualbsp-solver"
 version = "0.1.0"
 description = "Solver for the sequence-dependent assembly-line balancing and scheduling problem (SUALBPS)"
 authors = ["Jan Niklas Engel <engeljanniklas@gmail.com>"]
@@ -33,7 +33,7 @@ warn_unused_configs = true
 no_implicit_reexport = true
 
 [tool.pytest.ini_options]
-addopts = "--cov=sualbsp"
+addopts = "--cov=sualbsp_solver"
 testpaths = [
     "tests",
 ]
