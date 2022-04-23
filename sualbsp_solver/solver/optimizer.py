@@ -13,8 +13,8 @@ class OptimizationProcedure(ABC):
     """Abstract class that describes procedures by which a SUALBPS problem can be optimized
 
     We differ between three types of optimization procedures:
-        - the Station oriented strategies (SH),
-        - the Task oriented strategies (TH), and
+        - the Station oriented strategy (SH),
+        - the Task oriented strategy (TH), and
         - the GRASP Metaheuristics
 
     Ordering rules for candidate selection are:
