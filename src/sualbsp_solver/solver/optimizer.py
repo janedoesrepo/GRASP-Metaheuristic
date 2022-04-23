@@ -35,9 +35,11 @@ class OptimizationProcedure(ABC):
     @abstractmethod
     def solve(self, instance: Graph) -> List[Station]:
         pass
-    
+
     @abstractmethod
-    def construct_solution(self, candidate_list: TaskList, cycle_time: int) -> List[Station]:
+    def construct_solution(
+        self, candidate_list: TaskList, cycle_time: int
+    ) -> List[Station]:
         pass
 
     def __str__(self) -> str:
@@ -52,12 +54,12 @@ class StationOrientedStrategy(OptimizationProcedure):
         self.ordering_rule = ordering_rule
 
     def solve(self, instance: Graph) -> List[Station]:
-       
+
         print(f"Applying {self} with {self.ordering_rule}")
         task_list = TaskList(copy.deepcopy(instance.tasks))
         solution = self.construct_solution(task_list, instance.cycle_time)
         return solution
-    
+
     def construct_solution(self, task_list: TaskList, cycle_time: int) -> List[Station]:
 
         # initialize stations
@@ -110,9 +112,9 @@ class TaskOrientedStrategy(OptimizationProcedure):
 
     def __init__(self, ordering_rule: TaskOrderingRule) -> None:
         self.ordering_rule = ordering_rule
-    
+
     def solve(self, instance: Graph) -> List[Station]:
-       
+
         print(f"Applying {self} with {self.ordering_rule}")
         task_list = TaskList(copy.deepcopy(instance.tasks))
         solution = self.construct_solution(task_list, instance.cycle_time)
@@ -160,18 +162,18 @@ class TaskOrientedStrategy(OptimizationProcedure):
 
 class GRASP(OptimizationProcedure):
     """TODO Docstring"""
-    
+
     def __init__(self, num_iter: int) -> None:
         self.num_iter = num_iter
-    
-    def solve(self, instance: Graph) -> List[Station]:         
+
+    def solve(self, instance: Graph) -> List[Station]:
         print(f"Applying GRASP-{self.num_iter} Metaheuristic")
 
         best_solution: List[Station] = []
         for iteration in range(1, self.num_iter + 1):
             # get a mutable copy of the original task list
             candidate_list = TaskList(copy.deepcopy(instance.tasks))
-            
+
             solution = self.construct_solution(candidate_list, instance.cycle_time)
             improved_solution = improve_solution(solution, instance.cycle_time)
 
@@ -182,13 +184,15 @@ class GRASP(OptimizationProcedure):
                 best_solution = improved_solution
 
         return best_solution
-    
-    def construct_solution(self, candidate_list: TaskList, cycle_time: int) -> List[Station]:
+
+    def construct_solution(
+        self, candidate_list: TaskList, cycle_time: int
+    ) -> List[Station]:
         """TODO: self is never used"""
         # Initialise solution with one empty station
         stations = [Station(cycle_time)]
         current_station = stations[-1]
-        
+
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
@@ -196,7 +200,7 @@ class GRASP(OptimizationProcedure):
 
             # Condition 2: tasks fit into the current station
             candidates = candidates.that_fit(current_station)
-            
+
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
                 stations.append(Station(cycle_time))
@@ -204,7 +208,7 @@ class GRASP(OptimizationProcedure):
                 continue
 
             # Find candidates that fulfill a threshold condition
-            restricted_candidates = candidates.restricted_candidates(current_station)        
+            restricted_candidates = candidates.restricted_candidates(current_station)
 
             # next task to be sequenced is picked randomly from the restricted candidate list
             next_task = random.choice(restricted_candidates)
@@ -218,15 +222,16 @@ class GRASP(OptimizationProcedure):
 
         return stations
 
+
 def create_optimizers() -> List[OptimizationProcedure]:
     """Creates a list of all optimization procedures"""
-    
+
     optimizers: List[OptimizationProcedure] = []
     ordering_rules = TaskOrderingRule.__subclasses__()
     for rule in ordering_rules:
         optimizers.append(StationOrientedStrategy(rule()))
         optimizers.append(TaskOrientedStrategy(rule()))
-        
+
     for num_iter in [5, 10]:
         optimizers.append(GRASP(num_iter))
 

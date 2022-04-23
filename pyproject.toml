@@ -13,6 +13,7 @@ flake8 = "^4.0.1"
 pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 mypy = "^0.942"
+pre-commit = "^2.18.1"
 
 [tool.flake8]
 max-line-length = 160
