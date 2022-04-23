@@ -1,8 +1,8 @@
 import copy
 import random
-from tasklist import TaskList
-from station import Station
 from typing import Callable, List, Tuple
+
+from data_model import Station, TaskList
 
 
 def balanced_objective(solution: List[Station]) -> float:

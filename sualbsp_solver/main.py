@@ -1,11 +1,11 @@
 from time import perf_counter
 from typing import Dict, Generator, List
 
-from config import read_config
+from config import GraphConfig
+from data_model import Graph
 from experiment import Experiment
 from exporter import Exporter
-from graph import Graph
-from optimizer import OptimizationProcedure, create_optimizers
+from solver import OptimizationProcedure, create_optimizers
 
 
 def run_experiments(instances: Generator[Graph, None, None], optimizers: List[OptimizationProcedure]) -> List[Dict]:
@@ -30,10 +30,10 @@ def run_experiments(instances: Generator[Graph, None, None], optimizers: List[Op
 
     return solutions
 
-def main():
+def main(config_path: str) -> None:
     
     # read the configuration settings from a JSON file
-    config = read_config("./sualbsp_solver/config.json")
+    config = GraphConfig.read(config_path)
 
     # Create instances and optimization procedures
     instances = Graph.from_IN2(config)
@@ -46,4 +46,4 @@ def main():
     Exporter.export_results(results, config.all_results_file)
 
 if __name__ == "__main__":
-    main()
+    main(config_path="./sualbsp_solver/config/config.json")

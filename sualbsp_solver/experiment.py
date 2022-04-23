@@ -1,11 +1,12 @@
-from graph import Graph
-from optimizer import OptimizationProcedure
 from time import perf_counter
 from typing import Dict, List
 
+from data_model import Graph
+from solver import OptimizationProcedure
+
 
 class Experiment:
-    """Model an experiment that takes an Graph instance and an optimizer"""
+    """Model an experiment that takes a Graph instance and an optimizer to solve that instance"""
     
     def __init__(self) -> None:
         self.solutions: List[Dict] = []

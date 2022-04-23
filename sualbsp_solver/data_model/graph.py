@@ -1,7 +1,10 @@
 from __future__ import annotations
+
 from typing import Generator, List
+
 from config import GraphConfig
-from task import Task
+
+from data_model.task import Task
 
 
 class Graph:

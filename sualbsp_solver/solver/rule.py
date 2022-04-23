@@ -1,9 +1,8 @@
 import statistics
 from abc import ABC, abstractmethod
-from station import Station
-from task import Task
-from tasklist import TaskList
 from typing import List, Tuple
+
+from data_model import Station, Task, TaskList
 
 
 class TaskOrderingRule(ABC):

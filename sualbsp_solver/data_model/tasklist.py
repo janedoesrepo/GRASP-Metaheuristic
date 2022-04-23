@@ -1,9 +1,11 @@
 from __future__ import annotations
+
 from collections.abc import Sequence
 from dataclasses import dataclass
-from station import Station
-from task import Task
 from typing import List
+
+from data_model.station import Station
+from data_model.task import Task
 
 
 @dataclass

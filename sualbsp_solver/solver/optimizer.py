@@ -1,12 +1,12 @@
 import copy
 import random
 from abc import ABC, abstractmethod
-from graph import Graph
-from local_search import improve_solution
-from rule import TaskOrderingRule
-from station import Station
-from tasklist import TaskList
 from typing import List
+
+from data_model import Graph, Station, TaskList
+
+from solver.local_search import improve_solution
+from solver.rule import TaskOrderingRule
 
 
 class OptimizationProcedure(ABC):

@@ -1,7 +1,8 @@
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from task import Task
 from typing import List
+
+from data_model.task import Task
 
 
 @dataclass(eq=False)
