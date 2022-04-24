@@ -39,7 +39,6 @@ def test_add_and_remove_predecessor(task1: Task, task2: Task) -> None:
 def test_remove_task_that_is_no_predecessor(task1: Task, task2: Task) -> None:
 
     task2.remove_predecessor(task1)
-    assert not task1.is_predecessor_of(task2)
 
 
 def test_setup_time_retrieval(task1: Task, task2: Task) -> None:

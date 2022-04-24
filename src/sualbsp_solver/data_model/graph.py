@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import Generator, List
 
 from sualbsp_solver.config import GraphConfig
-from sualbsp_solver.data_model.task import Task
+
+from .task import Task
 
 
 class Graph:
@@ -51,7 +52,7 @@ class Graph:
                 setup_times_i = file.readline().split(",")
                 tasks[i].setup_times = list(map(int, setup_times_i))
 
-        print(f"*Import of {filepath} successful!*")
+        print(f">>> Import of {filepath} successful!")
 
         name = filepath.split("/")[-1][:-4]
 

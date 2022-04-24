@@ -4,8 +4,9 @@ from abc import ABC, abstractmethod
 from typing import List
 
 from sualbsp_solver.data_model import Graph, Station, TaskList
-from sualbsp_solver.solver.local_search import improve_solution
-from sualbsp_solver.solver.rule import TaskOrderingRule
+
+from .local_search import improve_solution
+from .rule import TaskOrderingRule
 
 
 class OptimizationProcedure(ABC):

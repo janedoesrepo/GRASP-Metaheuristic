@@ -2,19 +2,18 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import List
 
-from sualbsp_solver.data_model.station import Station
-from sualbsp_solver.data_model.task import Task
+from .station import Station
+from .task import Task
 
 
 @dataclass
 class TaskList(Sequence):
     """Container for objects of type `Task`."""
 
-    task_list: List[Task] = field(default_factory=list)
+    task_list: list[Task] = field(default_factory=list)
 
-    def __getitem__(self, index: int | slice) -> Task | TaskList:
+    def __getitem__(self, index: int | slice):
         """Returns the task at index from the list. For slice a new TaskList is returned."""
         if isinstance(index, int):
             return self.task_list[index]
@@ -25,15 +24,20 @@ class TaskList(Sequence):
         """Returns the number of tasks in the TaskList."""
         return len(self.task_list)
 
-    def reassemble(self, cycle_time: int) -> List[Station]:
+    def reassemble(self, cycle_time: int) -> list[Station]:
         """Reassemble the list of tasks into a list of stations.
 
         The tasks in the TaskList are assigned to stations one by one.
         If a station is full (i.e. assigning the next task would exceed
         the cycle time), open a new station and continue reassembling.
+
+        Remarks:
+            TaskList shouldn't need to know about Station. This function
+            could be placed in Station as `from_task_list` (TODO).
+            Beware of circular imports.
         """
 
-        solution: List[Station] = [Station(cycle_time)]
+        solution: list[Station] = [Station(cycle_time)]
         current_station = solution[-1]
 
         for task in self.task_list:
@@ -72,7 +76,7 @@ class TaskList(Sequence):
             if next_task.is_predecessor_of(task):
                 task.remove_predecessor(next_task)
 
-    def greedy_indices(self, current_station: Station) -> List[float]:
+    def greedy_indices(self, current_station: Station) -> list[float]:
         """Calculate the greedy index g() for all candidate tasks with respect to the current station."""
         if current_station.empty():
             return [1 / task.processing_time for task in self.task_list]
@@ -85,6 +89,7 @@ class TaskList(Sequence):
     def restricted_candidates(
         self, current_station: Station, alpha: float = 0.3
     ) -> TaskList:
+        """Returns only tasks that are below the threshold."""
         # compute the greedy-Index g() for each candidate task
         greedy_indices = self.greedy_indices(current_station)
 
@@ -105,14 +110,14 @@ class TaskList(Sequence):
         self.task_list.remove(task)
 
     @staticmethod
-    def get_greedy_threshold(greedy_indices: List[float], alpha: float) -> float:
+    def get_greedy_threshold(greedy_indices: list[float], alpha: float) -> float:
         """Returns a threshold calcuated based on the greedy_indices and alpha."""
         gmin = min(greedy_indices)
         gmax = max(greedy_indices)
         return gmin + alpha * (gmax - gmin)
 
     @staticmethod
-    def from_solution(solution: List[Station]) -> TaskList:
+    def from_solution(solution: list[Station]) -> TaskList:
         """Returns a new TaskSequence created from a list of Stations."""
         return TaskList([task for station in solution for task in station])
 

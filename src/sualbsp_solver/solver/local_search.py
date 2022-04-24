@@ -71,7 +71,7 @@ def improve_solution(
 
                 # The exchange is feasible if right_task has no predecessors on his left in the sequence
                 if any(
-                    left_task.is_predecessor(right_task)
+                    left_task.is_predecessor_of(right_task)
                     for left_task in current_sequence[i:j]
                 ):
                     break
