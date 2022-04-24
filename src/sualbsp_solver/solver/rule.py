@@ -1,9 +1,8 @@
 import statistics
 from abc import ABC, abstractmethod
-from station import Station
-from task import Task
-from tasklist import TaskList
 from typing import List, Tuple
+
+from sualbsp_solver.data_model import Station, Task, TaskList
 
 
 class TaskOrderingRule(ABC):
@@ -41,7 +40,7 @@ class MaxSOrdering(TaskOrderingRule):
     def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
         tasks_values = setups_only(candidates, station)
         tasks_values_sorted = sorted(tasks_values, key=lambda x: x[1], reverse=True)
-        return TaskList([task for task, _ in tasks_values_sorted]) 
+        return TaskList([task for task, _ in tasks_values_sorted])
 
 
 class MinSOrdering(TaskOrderingRule):
@@ -53,18 +52,26 @@ class MinSOrdering(TaskOrderingRule):
         return TaskList([task for task, _ in tasks_values_sorted])
 
 
-def setups_plus_processing(candidates: TaskList, station: Station) -> List[Tuple[Task, float]]:
-    """Return a tuple for each task in the candidate_list and its processing incl. setup time) """
-    
+def setups_plus_processing(
+    candidates: TaskList, station: Station
+) -> List[Tuple[Task, float]]:
+    """Return a tuple for each task in the candidate_list and its processing incl. setup time)"""
+
     if station.empty():
-        return [(task, task.processing_time + statistics.mean(task.setup_times)) for task in candidates]
+        return [
+            (task, task.processing_time + statistics.mean(task.setup_times))
+            for task in candidates
+        ]
     else:
-        return [(task, station[-1].setup_time(task) + task.processing_time) for task in candidates]
+        return [
+            (task, station[-1].setup_time(task) + task.processing_time)
+            for task in candidates
+        ]
 
 
 def setups_only(candidates: TaskList, station: Station) -> List[Tuple[Task, float]]:
-    """Return a tuple for each task in the candidate_list and its setup time """
-    
+    """Return a tuple for each task in the candidate_list and its setup time"""
+
     if station.empty():
         return [(task, statistics.mean(task.setup_times)) for task in candidates]
     else:

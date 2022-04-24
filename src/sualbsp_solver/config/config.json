@@ -1,0 +1,7 @@
+{
+    "data_dir": "./src/data/SUALBSP-Instances_Capacho-and-Pastor_2008/Instances",
+    "graphs_file": "./src/graphs/mitchell_graph.txt",
+    "variants_file": "./src/graphs/martino_pastor_variants.txt",
+    "num_instances": 1,
+    "all_results_file": "./src/results/all_results.csv"
+}
