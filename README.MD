@@ -1,4 +1,5 @@
 [![PyTest](https://github.com/janedoesrepo/GRASP-Metaheuristic/actions/workflows/tests.yml/badge.svg)](https://github.com/janedoesrepo/GRASP-Metaheuristic/actions/workflows/tests.yml)
+[![Build Package](https://github.com/janedoesrepo/GRASP-Metaheuristic/actions/workflows/build.yml/badge.svg)](https://github.com/janedoesrepo/GRASP-Metaheuristic/actions/workflows/build.yml)
 
 # SUABLPS Solver
 
