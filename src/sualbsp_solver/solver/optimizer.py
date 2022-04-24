@@ -6,7 +6,7 @@ from typing import List
 from sualbsp_solver.data_model import Graph, Station, TaskList
 
 from .local_search import improve_solution
-from .rule import TaskOrderingRule
+from .ordering_rule import TaskOrderingRule
 
 
 class OptimizationProcedure(ABC):

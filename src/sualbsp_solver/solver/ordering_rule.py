@@ -6,7 +6,7 @@ from sualbsp_solver.data_model import Station, Task, TaskList
 
 
 class TaskOrderingRule(ABC):
-    """Abstract class that decsribes a rule by which a list of tasks should be ordered."""
+    """A TaskOrderingRule defines how a list of tasks should be ordered."""
 
     @abstractmethod
     def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:

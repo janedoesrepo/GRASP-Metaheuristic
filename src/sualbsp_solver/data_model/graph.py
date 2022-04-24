@@ -45,7 +45,7 @@ class Graph:
             # Add the ids of the predecessor to each Task
             for _ in range(num_relations):
                 predecessor_id, successor_id = file.readline().split(",")
-                tasks[int(successor_id)].predecessors.append(int(predecessor_id))
+                tasks[int(successor_id)].predecessors.add(int(predecessor_id))
 
             # Add the setup times from one Task to all other Tasks
             for i in range(num_tasks):

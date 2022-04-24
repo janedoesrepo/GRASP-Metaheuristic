@@ -23,23 +23,22 @@ class Task:
 
     id: int
     processing_time: int = field(compare=False)
-    predecessors: list[int] = field(
-        default_factory=list, init=False, repr=False, compare=False
+    predecessors: set[int] = field(
+        default_factory=set, init=False, repr=False, compare=False
     )
     setup_times: list[int] = field(
         default_factory=list, init=False, repr=False, compare=False
     )
 
     def add_predecessor(self, other: Task) -> None:
-        """Adds other to the list of predecessors of self.
+        """Add other to the set of predecessors.
 
-        If other already is a predecessor of self, do nothing.
+        This has no effect if the task is already present.
         """
-        if not other.is_predecessor_of(self):
-            self.predecessors.append(other.id)
+        self.predecessors.add(other.id)
 
     def remove_predecessor(self, other: Task) -> None:
-        """Remove other from the list of predecessors.
+        """Remove other from the set of predecessors.
 
         If other is not a predecessor of self, do nothing.
 
@@ -48,8 +47,7 @@ class Task:
             track of tasks that are are already in a solution.
             Then no copy of task lists would be necessary.
         """
-        if other.is_predecessor_of(self):
-            self.predecessors.remove(other.id)
+        self.predecessors.discard(other.id)
 
     def is_predecessor_of(self, other: Task) -> bool:
         """Returns True if self is a predecessor of other."""
