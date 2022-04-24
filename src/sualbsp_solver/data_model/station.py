@@ -43,4 +43,4 @@ class Station(Sequence):
         if self.empty():
             return task.processing_time
         else:
-            return self[-1].setup_time(task) + task.processing_time
+            return self[-1].setup_time_to(task) + task.processing_time

@@ -64,7 +64,7 @@ def setups_plus_processing(
         ]
     else:
         return [
-            (task, station[-1].setup_time(task) + task.processing_time)
+            (task, station[-1].setup_time_to(task) + task.processing_time)
             for task in candidates
         ]
 
@@ -75,4 +75,4 @@ def setups_only(candidates: TaskList, station: Station) -> List[Tuple[Task, floa
     if station.empty():
         return [(task, statistics.mean(task.setup_times)) for task in candidates]
     else:
-        return [(task, station[-1].setup_time(task)) for task in candidates]
+        return [(task, station[-1].setup_time_to(task)) for task in candidates]

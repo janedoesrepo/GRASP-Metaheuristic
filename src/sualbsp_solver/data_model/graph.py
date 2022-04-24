@@ -20,12 +20,12 @@ class Graph:
         """Import-function for the data set of Martino and Pastor (2010)
         The data is available at https://www.assembly-line-balancing.de/sualbsp
 
-        line 1:                     n; number of tasks
-        line 2:                     p; number of direct precedence relations
-        line 3:                     c; cycle time
-        lines 4 to 4+n-1:           cl, t; id task, processing time
-        lines 4+n to 4+n+p-1:       relations; direct precedence relations in form i,j
-        lines 4+n+p to 4+2n+p-1:    tsu; setup times
+        line 1:                     n: number of tasks
+        line 2:                     p: number of direct precedence relations
+        line 3:                     c: cycle time
+        lines 4 to 4+n-1:           cl, t: task id, processing time
+        lines 4+n to 4+n+p-1:       relations: direct precedence relations in form i,j
+        lines 4+n+p to 4+2n+p-1:    tsu: setup times
         """
 
         with open(filepath, "r") as file:

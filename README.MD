@@ -34,3 +34,7 @@ The sequence-dependent assembly line balancing and scheduling problem (SUALBSP) 
 The problem was origonally introduced by Andrés et al. (2008) and modified by differentiating between forward setup times (walking concerning the same workpiece) and backward setup times (walking to the next workpiece at the end of each cycle) by Scholl et al. (2013).
 
 Source: https://assembly-line-balancing.de/sualbsp/
+
+## TODO
+
+- Test if setting `slots=True` has a positive impact on experiment runtime
