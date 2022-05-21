@@ -3,7 +3,7 @@ import random
 
 from sualbsp_solver.data_model.graph import Graph
 from sualbsp_solver.data_model.station import Station
-from sualbsp_solver.data_model.tasklist import TaskList
+from sualbsp_solver.data_model.task_list import TaskList
 from sualbsp_solver.solver.local_search import improve_solution
 from sualbsp_solver.solver.optimizer import OptimizationProcedure
 
@@ -36,7 +36,11 @@ class GRASP(OptimizationProcedure):
     def construct_solution(
         self, candidate_list: TaskList, cycle_time: int
     ) -> list[Station]:
-        """TODO: self is never used"""
+        """Takes a `candidate_list` and assigns them to Stations with `cycle_time`.
+
+        TODO: self is never used
+        """
+
         # Initialise solution with one empty station
         stations = [Station(cycle_time)]
         current_station = stations[-1]

@@ -1,18 +1,18 @@
 import copy
 import random
-from typing import Callable, List, Tuple
+from typing import Callable, Tuple
 
 from sualbsp_solver.data_model import Station, TaskList
 
 
-def balanced_objective(solution: List[Station]) -> float:
+def balanced_objective(solution: list[Station]) -> float:
     """MINIMIZE the objective to create solutions with a balanced workload"""
     return sum(
         pow(station.station_time / station.cycle_time, 2) for station in solution
     )
 
 
-def imbalanced_objective(solution: List[Station], eps: float = 0.001) -> float:
+def imbalanced_objective(solution: list[Station], eps: float = 0.001) -> float:
     """MAXIMIZE the objective to create solutions with an imbalanced workload"""
     return sum(
         pow(station.cycle_time - station.station_time + eps, -1) for station in solution
@@ -38,8 +38,8 @@ def get_objective_functions(probability_threshold: float) -> Tuple[Callable, Cal
 
 
 def improve_solution(
-    solution: List[Station], cycle_time: int, probability_threshold: float = 0.75
-) -> List[Station]:
+    solution: list[Station], cycle_time: int, probability_threshold: float = 0.75
+) -> list[Station]:
     """Try to improve a solution by exchanging the position of tasks"""
 
     # create a flattened version of the solution
@@ -71,7 +71,7 @@ def improve_solution(
 
                 # The exchange is feasible if right_task has no predecessors on his left in the sequence
                 if any(
-                    left_task.is_predecessor(right_task)
+                    left_task.is_predecessor_of(right_task)
                     for left_task in current_sequence[i:j]
                 ):
                     break

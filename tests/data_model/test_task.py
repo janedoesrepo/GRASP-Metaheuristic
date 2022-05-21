@@ -34,3 +34,10 @@ def test_get_setup_time_to_other() -> None:
     task2 = Task(2, 4)
 
     assert task1.setup_time(task2) == 3
+
+
+def test_task_compare() -> None:
+    """Two Tasks should be considered equals, if their id matches."""
+    task1 = Task(0, 3)
+    task2 = Task(0, 5)
+    assert task1 == task2
