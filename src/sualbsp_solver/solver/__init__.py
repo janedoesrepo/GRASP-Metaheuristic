@@ -1,1 +1,1 @@
-from .optimizer import OptimizationProcedure, create_optimizers
+from .optimizer import OptimizationProcedure
