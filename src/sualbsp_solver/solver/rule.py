@@ -6,7 +6,10 @@ from sualbsp_solver.data_model import Station, Task, TaskList
 
 
 class TaskOrderingRule(ABC):
-    """Abstract class that decsribes a rule by which a list of tasks should be ordered."""
+    """Abstract class that decsribes a rule by which a list of tasks should be ordered.
+
+    TODO: switch to functional approach for ordering rules
+    """
 
     @abstractmethod
     def order_tasks(self, candidates: TaskList, station: Station) -> TaskList:
@@ -76,3 +79,7 @@ def setups_only(candidates: TaskList, station: Station) -> List[Tuple[Task, floa
         return [(task, statistics.mean(task.setup_times)) for task in candidates]
     else:
         return [(task, station[-1].setup_time(task)) for task in candidates]
+
+
+def get_ordering_rules() -> list[TaskOrderingRule]:
+    return [MaxTSOrdering(), MinTSOrdering(), MaxSOrdering(), MinSOrdering()]
