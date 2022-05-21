@@ -59,7 +59,7 @@ class TaskList(Sequence):
     def remove_from_predecessors(self, next_task: Task) -> None:
         """Removes the precedence relation of a newly sequenced tasked from all other tasks"""
         for task in self.task_list:
-            if next_task.is_predecessor(task):
+            if next_task.is_predecessor_of(task):
                 task.remove_predecessor(next_task)
 
     def greedy_indices(self, current_station: Station) -> List[float]:

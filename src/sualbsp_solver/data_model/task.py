@@ -11,7 +11,7 @@ class Task:
     predecessors: List[int] = field(default_factory=list, repr=False, compare=False)
     setup_times: List[int] = field(default_factory=list, repr=False, compare=False)
 
-    def is_predecessor(self, other: Task) -> bool:
+    def is_predecessor_of(self, other: Task) -> bool:
         """Returns True if self is a predecessor of other"""
         return self.id in other.predecessors
 
@@ -25,5 +25,5 @@ class Task:
         self.predecessors.remove(other.id)
 
     def setup_time(self, other: Task) -> int:
-        """Returns the setup time from self to the task passed as an argument"""
+        """Returns the setup time from `self` to the task passed as an argument"""
         return self.setup_times[other.id]

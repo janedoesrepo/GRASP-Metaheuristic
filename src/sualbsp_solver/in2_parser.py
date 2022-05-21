@@ -18,7 +18,7 @@ def parse_graph(filepath: Path) -> Graph:
         line 1:                     n: number of tasks
         line 2:                     p: number of direct precedence relations
         line 3:                     c: cycle time
-        lines 4 to 4+n-1:           cl, t: task id, processing time
+        lines 4 to 4+n-1:           cl, t: task id (starts with 0), processing time
         lines 4+n to 4+n+p-1:       relations: direct precedence relations in form i,j
         lines 4+n+p to 4+2n+p-1:    tsu: setup times
     """
