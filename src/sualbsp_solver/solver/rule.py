@@ -60,7 +60,7 @@ def setups_plus_processing(
 ) -> List[Tuple[Task, float]]:
     """Return a tuple for each task in the candidate_list and its processing incl. setup time)"""
 
-    if station.empty():
+    if station.is_empty():
         return [
             (task, task.processing_time + statistics.mean(task.setup_times))
             for task in candidates
@@ -75,7 +75,7 @@ def setups_plus_processing(
 def setups_only(candidates: TaskList, station: Station) -> List[Tuple[Task, float]]:
     """Return a tuple for each task in the candidate_list and its setup time"""
 
-    if station.empty():
+    if station.is_empty():
         return [(task, statistics.mean(task.setup_times)) for task in candidates]
     else:
         return [(task, station[-1].setup_time(task)) for task in candidates]

@@ -3,6 +3,7 @@ import random
 
 from sualbsp_solver.data_model.graph import Graph
 from sualbsp_solver.data_model.station import Station
+from sualbsp_solver.data_model.task import Task
 from sualbsp_solver.data_model.task_list import TaskList
 from sualbsp_solver.solver.local_search import improve_solution
 from sualbsp_solver.solver.optimizer import OptimizationProcedure
@@ -63,7 +64,7 @@ class GRASP(OptimizationProcedure):
             greedy_indices = self.get_greedy_indices(candidates, current_station)
 
             # Compute threshold function
-            threshold = self.get_threshold(greedy_indices, alpha=0.3)
+            threshold = self.get_greedy_threshold(greedy_indices, alpha=0.3)
 
             # Find candidates that fulfill a threshold condition
             restricted_candidates = self.get_restricted_candidates(
@@ -82,19 +83,24 @@ class GRASP(OptimizationProcedure):
 
         return stations
 
+    def calculate_greedy_index(self, total_processing_time: int) -> float:
+        return 1 / total_processing_time
+
     def get_greedy_indices(
         self, tasks: TaskList, current_station: Station
     ) -> list[float]:
         """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
-        if current_station.empty():
-            return [1 / task.processing_time for task in tasks]
+        if current_station.is_empty():
+            return [self.calculate_greedy_index(task.processing_time) for task in tasks]
         else:
             return [
-                1 / (current_station[-1].setup_time(task) + task.processing_time)
+                self.calculate_greedy_index(
+                    current_station[-1].setup_time(task) + task.processing_time
+                )
                 for task in tasks
             ]
 
-    def get_threshold(self, greedy_indices: list[float], alpha: float) -> float:
+    def get_greedy_threshold(self, greedy_indices: list[float], alpha: float) -> float:
         gmin = min(greedy_indices)
         gmax = max(greedy_indices)
         return gmin + alpha * (gmax - gmin)
