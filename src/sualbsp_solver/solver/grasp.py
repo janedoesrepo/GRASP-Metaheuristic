@@ -3,7 +3,6 @@ import random
 
 from sualbsp_solver.data_model.graph import Graph
 from sualbsp_solver.data_model.station import Station
-from sualbsp_solver.data_model.task import Task
 from sualbsp_solver.data_model.task_list import TaskList
 from sualbsp_solver.solver.local_search import improve_solution
 from sualbsp_solver.solver.optimizer import OptimizationProcedure
@@ -20,6 +19,8 @@ class GRASP(OptimizationProcedure):
 
         best_solution: list[Station] = []
         for iteration in range(1, self.num_iter + 1):
+            # print(f"\t>>> Iteration #{iteration}")
+
             # get a mutable copy of the original task list
             candidate_list = TaskList(copy.deepcopy(instance.tasks))
 

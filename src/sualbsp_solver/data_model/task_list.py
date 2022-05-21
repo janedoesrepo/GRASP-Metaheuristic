@@ -50,7 +50,7 @@ class TaskList(Sequence):
         return solution
 
     def swap_tasks(self, pos1: int, pos2: int) -> TaskList:
-        """Returns a new sequence with the position of two tasks swapped"""
+        """Returns a new TaskList with the position of two tasks swapped"""
         new_sequence = self._tasks.copy()
         new_sequence[pos2] = self._tasks[pos1]
         new_sequence[pos1] = self._tasks[pos2]
@@ -80,7 +80,7 @@ class TaskList(Sequence):
 
     @staticmethod
     def from_solution(solution: list[Station]) -> TaskList:
-        """Returns a new TaskSequence created from a list of Stations"""
+        """Returns a new TaskList created from a list of Stations."""
         return TaskList([task for station in solution for task in station])
 
     @property

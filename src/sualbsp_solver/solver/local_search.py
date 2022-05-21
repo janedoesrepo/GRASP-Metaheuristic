@@ -1,6 +1,6 @@
 import copy
 import random
-from typing import Callable, Tuple
+from typing import Callable
 
 from sualbsp_solver.data_model import Station, TaskList
 
@@ -29,7 +29,7 @@ def imbalanced_variation(objective1: float, objective2: float) -> float:
     return objective2 - objective1
 
 
-def get_objective_functions(probability_threshold: float) -> Tuple[Callable, Callable]:
+def get_objective_functions(probability_threshold: float) -> tuple[Callable, Callable]:
     """Returns two objective functions based on a random behaviour."""
     if random.random() <= probability_threshold:
         return balanced_objective, balanced_variation
@@ -40,7 +40,7 @@ def get_objective_functions(probability_threshold: float) -> Tuple[Callable, Cal
 def improve_solution(
     solution: list[Station], cycle_time: int, probability_threshold: float = 0.75
 ) -> list[Station]:
-    """Try to improve a solution by exchanging the position of tasks"""
+    """Try to improve a solution by exchanging the position of tasks."""
 
     # create a flattened version of the solution
     solution_sequence = TaskList.from_solution(solution)
@@ -74,6 +74,7 @@ def improve_solution(
                     left_task.is_predecessor_of(right_task)
                     for left_task in current_sequence[i:j]
                 ):
+                    print(f">>> Task {right_task} has predecessory")
                     break
 
                 # Exchange the tasks and reassemble the modified sequence
@@ -91,7 +92,6 @@ def improve_solution(
                     valid_solutions.append((num_stations_modified, variation, (i, j)))
 
         """Find the best of all exchanges"""
-
         # get best value in order min(m), min(var), min(key)
         best_exchange = min(valid_solutions)
         best_exchange_m = best_exchange[0]
@@ -99,11 +99,10 @@ def improve_solution(
         i, j = best_exchange[2]
 
         # is best_exchange better than current_solution?
-        if best_exchange_m < num_stations_current:
-            # because it has fewer stations
-            current_sequence = current_sequence.swap_tasks(i, j)
-        elif best_exchange_variation < 0:
-            # because it has positive variation
+        has_fewer_stations = best_exchange_m < num_stations_current
+        has_positive_variation = best_exchange_variation < 0
+
+        if has_fewer_stations | has_positive_variation:
             current_sequence = current_sequence.swap_tasks(i, j)
         else:
             # Current sequence can't be improved -> end while-loop
