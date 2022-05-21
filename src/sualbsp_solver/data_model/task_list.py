@@ -71,7 +71,12 @@ class TaskList(Sequence):
                 task.remove_predecessor(next_task)
 
     def remove(self, task: Task) -> None:
-        self._tasks.remove(task)
+        """Remove first occurrence of task.
+        Raises ValueError if the task is not present."""
+        try:
+            self._tasks.remove(task)
+        except ValueError as e:
+            raise e
 
     @staticmethod
     def from_solution(solution: list[Station]) -> TaskList:
