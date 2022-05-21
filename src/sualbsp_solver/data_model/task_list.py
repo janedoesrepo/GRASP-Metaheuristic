@@ -56,11 +56,11 @@ class TaskList(Sequence):
         new_sequence[pos1] = self._tasks[pos2]
         return TaskList(new_sequence)
 
-    def without_predecessors(self) -> TaskList:
+    def get_tasks_without_predecessors(self) -> TaskList:
         """Returns a list of tasks that have no predecessors"""
         return TaskList([task for task in self._tasks if not len(task.predecessors)])
 
-    def that_fit(self, station: Station) -> TaskList:
+    def get_tasks_that_fit_station(self, station: Station) -> TaskList:
         """Returns a list of tasks that fit into the station"""
         return TaskList([task for task in self._tasks if station.can_fit(task)])
 
@@ -70,42 +70,8 @@ class TaskList(Sequence):
             if next_task.is_predecessor_of(task):
                 task.remove_predecessor(next_task)
 
-    def greedy_indices(self, current_station: Station) -> list[float]:
-        """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
-        if current_station.empty():
-            return [1 / task.processing_time for task in self._tasks]
-        else:
-            return [
-                1 / (current_station[-1].setup_time(task) + task.processing_time)
-                for task in self._tasks
-            ]
-
-    def restricted_candidates(
-        self, current_station: Station, alpha: float = 0.3
-    ) -> TaskList:
-        # compute the greedy-Index g() for each candidate task
-        greedy_indices = self.greedy_indices(current_station)
-
-        # Compute threshold function
-        threshold = self.get_threshold(greedy_indices, alpha)
-
-        # Find candidates that pass the threshold condition
-        return TaskList(
-            [
-                task
-                for task, greedy_index in zip(self._tasks, greedy_indices)
-                if greedy_index <= threshold
-            ]
-        )
-
     def remove(self, task: Task) -> None:
         self._tasks.remove(task)
-
-    @staticmethod
-    def get_threshold(greedy_indices: list[float], alpha: float) -> float:
-        gmin = min(greedy_indices)
-        gmax = max(greedy_indices)
-        return gmin + alpha * (gmax - gmin)
 
     @staticmethod
     def from_solution(solution: list[Station]) -> TaskList:

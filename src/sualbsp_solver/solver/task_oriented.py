@@ -36,7 +36,7 @@ class TaskOrientedStrategy(OptimizationProcedure):
         while len(task_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidates = task_list.without_predecessors()
+            candidates = task_list.get_tasks_without_predecessors()
 
             # order the list of station candidates
             ordered_candidates = self.ordering_rule.order_tasks(

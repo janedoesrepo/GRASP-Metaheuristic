@@ -28,10 +28,10 @@ class StationOrientedStrategy(OptimizationProcedure):
         while len(task_list):
 
             # Condition 1: tasks have no precedence relations
-            candidates = task_list.without_predecessors()
+            candidates = task_list.get_tasks_without_predecessors()
 
             # Condition 2: tasks fit into the current station
-            candidates = candidates.that_fit(current_station)
+            candidates = candidates.get_tasks_that_fit_station(current_station)
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):

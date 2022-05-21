@@ -48,10 +48,10 @@ class GRASP(OptimizationProcedure):
         while len(candidate_list):
 
             # Condition 1: candidates are tasks that have no precedence relations
-            candidates = candidate_list.without_predecessors()
+            candidates = candidate_list.get_tasks_without_predecessors()
 
             # Condition 2: tasks fit into the current station
-            candidates = candidates.that_fit(current_station)
+            candidates = candidates.get_tasks_that_fit_station(current_station)
 
             # if there are no candidates for the current station open a new empty station
             if not len(candidates):
@@ -59,8 +59,16 @@ class GRASP(OptimizationProcedure):
                 current_station = stations[-1]
                 continue
 
+            # compute the greedy-Index g() for each candidate task
+            greedy_indices = self.get_greedy_indices(candidates, current_station)
+
+            # Compute threshold function
+            threshold = self.get_threshold(greedy_indices, alpha=0.3)
+
             # Find candidates that fulfill a threshold condition
-            restricted_candidates = candidates.restricted_candidates(current_station)
+            restricted_candidates = self.get_restricted_candidates(
+                candidates, greedy_indices, threshold
+            )
 
             # next task to be sequenced is picked randomly from the restricted candidate list
             next_task = random.choice(restricted_candidates)
@@ -73,3 +81,33 @@ class GRASP(OptimizationProcedure):
             candidate_list.remove_from_predecessors(next_task)
 
         return stations
+
+    def get_greedy_indices(
+        self, tasks: TaskList, current_station: Station
+    ) -> list[float]:
+        """Calculate the greedy index g() for all candidate tasks with respect to the current station"""
+        if current_station.empty():
+            return [1 / task.processing_time for task in tasks]
+        else:
+            return [
+                1 / (current_station[-1].setup_time(task) + task.processing_time)
+                for task in tasks
+            ]
+
+    def get_threshold(self, greedy_indices: list[float], alpha: float) -> float:
+        gmin = min(greedy_indices)
+        gmax = max(greedy_indices)
+        return gmin + alpha * (gmax - gmin)
+
+    def get_restricted_candidates(
+        self, tasks: TaskList, greedy_indices: list[float], threshold: float
+    ) -> TaskList:
+
+        # Find candidates that pass the threshold condition
+        return TaskList(
+            [
+                task
+                for task, greedy_index in zip(tasks, greedy_indices)
+                if greedy_index <= threshold
+            ]
+        )
