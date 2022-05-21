@@ -6,6 +6,7 @@ authors = ["Jan Niklas Engel <engeljanniklas@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+requests = "^2.27.1"
 
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
@@ -14,6 +15,7 @@ pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
 mypy = "^0.942"
 pre-commit = "^2.18.1"
+types-requests = "^2.27.27"
 
 [tool.flake8]
 max-line-length = 160
